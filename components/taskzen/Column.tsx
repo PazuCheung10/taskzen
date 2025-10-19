@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useTaskzenStore } from '@/lib/taskzen/store';
-import { selectCardsInColumn } from '@/lib/taskzen/selectors';
+import { selectCardsInColumn, filterBoard } from '@/lib/taskzen/selectors';
 import { ColumnId } from '@/lib/taskzen/types';
 import NewCardForm from './NewCardForm';
 import CardItem from './CardItem';
@@ -10,12 +10,16 @@ import CardItem from './CardItem';
 interface ColumnProps {
   columnId: ColumnId;
   title: string;
+  searchQuery: string;
 }
 
-export default function Column({ columnId, title }: ColumnProps) {
+export default function Column({ columnId, title, searchQuery }: ColumnProps) {
   const [showAddForm, setShowAddForm] = useState(false);
   const { columns, reorderCard } = useTaskzenStore();
-  const cards = selectCardsInColumn({ columns }, columnId);
+  
+  // Apply search filter if there's a query
+  const filteredBoard = searchQuery ? filterBoard({ columns }, searchQuery) : { columns };
+  const cards = selectCardsInColumn(filteredBoard, columnId);
 
   const handleMoveUp = (cardId: string) => {
     const currentIndex = columns[columnId].cardOrder.indexOf(cardId);
@@ -26,7 +30,8 @@ export default function Column({ columnId, title }: ColumnProps) {
 
   const handleMoveDown = (cardId: string) => {
     const currentIndex = columns[columnId].cardOrder.indexOf(cardId);
-    if (currentIndex < cards.length - 1) {
+    const originalCards = selectCardsInColumn({ columns }, columnId);
+    if (currentIndex < originalCards.length - 1) {
       reorderCard(columnId, cardId, currentIndex + 1);
     }
   };
@@ -55,6 +60,7 @@ export default function Column({ columnId, title }: ColumnProps) {
         <button
           onClick={handleAddCard}
           className="bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-3 py-1 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400"
+          aria-label={`Add new card to ${title} column`}
         >
           + Add Card
         </button>
@@ -75,7 +81,13 @@ export default function Column({ columnId, title }: ColumnProps) {
       <div className="flex-1 space-y-3">
         {cards.length === 0 ? (
           <div className="text-sm text-slate-400 text-center py-8">
-            {showAddForm ? 'Fill out the form above to add your first card' : 'No cards yet'}
+            {searchQuery ? (
+              `No cards match "${searchQuery}"`
+            ) : showAddForm ? (
+              'Fill out the form above to add your first card'
+            ) : (
+              'No cards yet'
+            )}
           </div>
         ) : (
           cards.map((card, index) => (

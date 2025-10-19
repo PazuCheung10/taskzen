@@ -93,6 +93,7 @@ export default function NewCardForm({ columnId, onSuccess, onCancel }: NewCardFo
           type="submit"
           disabled={!title.trim() || isSubmitting}
           className="flex-1 bg-cyan-600 hover:bg-cyan-700 disabled:bg-slate-500 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400"
+          aria-label="Add new card to this column"
         >
           {isSubmitting ? 'Adding...' : 'Add Card'}
         </button>
@@ -100,6 +101,7 @@ export default function NewCardForm({ columnId, onSuccess, onCancel }: NewCardFo
           type="button"
           onClick={handleCancel}
           className="bg-slate-500 hover:bg-slate-400 text-white font-medium py-2 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400"
+          aria-label="Cancel adding new card"
         >
           Cancel
         </button>

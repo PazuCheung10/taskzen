@@ -31,3 +31,35 @@ export const getTotalCardCount = (board: Board): number => {
     0
   );
 };
+
+export const filterBoard = (board: Board, query: string): Board => {
+  if (!query.trim()) return board;
+  
+  const searchTerm = query.toLowerCase();
+  const filteredCards: Record<string, Card> = {};
+  const filteredColumns = { ...board.columns };
+  
+  // Filter cards that match the search query
+  Object.values(board.cards).forEach((card) => {
+    const matchesTitle = card.title.toLowerCase().includes(searchTerm);
+    const matchesDescription = card.description?.toLowerCase().includes(searchTerm) || false;
+    
+    if (matchesTitle || matchesDescription) {
+      filteredCards[card.id] = card;
+    }
+  });
+  
+  // Update column card orders to only include filtered cards
+  Object.keys(filteredColumns).forEach((columnId) => {
+    const column = filteredColumns[columnId as keyof typeof filteredColumns];
+    filteredColumns[columnId as keyof typeof filteredColumns] = {
+      ...column,
+      cardOrder: column.cardOrder.filter((cardId) => cardId in filteredCards),
+    };
+  });
+  
+  return {
+    columns: filteredColumns,
+    cards: filteredCards,
+  };
+};

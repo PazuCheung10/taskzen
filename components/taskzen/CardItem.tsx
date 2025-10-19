@@ -124,14 +124,16 @@ export default function CardItem({
             <button
               type="button"
               onClick={handleSave}
-              className="bg-green-600 hover:bg-green-700 text-white text-xs px-2 py-1 rounded transition-colors"
+              className="bg-green-600 hover:bg-green-700 text-white text-xs px-2 py-1 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-green-400"
+              aria-label="Save changes"
             >
               Save
             </button>
             <button
               type="button"
               onClick={handleCancel}
-              className="bg-slate-500 hover:bg-slate-400 text-white text-xs px-2 py-1 rounded transition-colors"
+              className="bg-slate-500 hover:bg-slate-400 text-white text-xs px-2 py-1 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400"
+              aria-label="Cancel editing"
             >
               Cancel
             </button>
@@ -168,16 +170,18 @@ export default function CardItem({
             <button
               onClick={onMoveUp}
               disabled={!canMoveUp}
-              className="bg-slate-500 hover:bg-slate-400 disabled:bg-slate-700 disabled:cursor-not-allowed text-white text-xs px-2 py-1 rounded transition-colors"
+              className="bg-slate-500 hover:bg-slate-400 disabled:bg-slate-700 disabled:cursor-not-allowed text-white text-xs px-2 py-1 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400"
               title="Move up"
+              aria-label={`Move "${card.title}" up in ${columnId} column`}
             >
               ↑
             </button>
             <button
               onClick={onMoveDown}
               disabled={!canMoveDown}
-              className="bg-slate-500 hover:bg-slate-400 disabled:bg-slate-700 disabled:cursor-not-allowed text-white text-xs px-2 py-1 rounded transition-colors"
+              className="bg-slate-500 hover:bg-slate-400 disabled:bg-slate-700 disabled:cursor-not-allowed text-white text-xs px-2 py-1 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400"
               title="Move down"
+              aria-label={`Move "${card.title}" down in ${columnId} column`}
             >
               ↓
             </button>
@@ -188,16 +192,18 @@ export default function CardItem({
             <button
               onClick={handleMoveLeft}
               disabled={!canMoveLeft}
-              className="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:cursor-not-allowed text-white text-xs px-2 py-1 rounded transition-colors"
+              className="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:cursor-not-allowed text-white text-xs px-2 py-1 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
               title="Move left"
+              aria-label={`Move "${card.title}" to previous column`}
             >
               ← Move
             </button>
             <button
               onClick={handleMoveRight}
               disabled={!canMoveRight}
-              className="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:cursor-not-allowed text-white text-xs px-2 py-1 rounded transition-colors"
+              className="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:cursor-not-allowed text-white text-xs px-2 py-1 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
               title="Move right"
+              aria-label={`Move "${card.title}" to next column`}
             >
               Move →
             </button>
@@ -207,15 +213,17 @@ export default function CardItem({
           <div className="flex gap-1">
             <button
               onClick={handleEdit}
-              className="bg-yellow-600 hover:bg-yellow-700 text-white text-xs px-2 py-1 rounded transition-colors"
+              className="bg-yellow-600 hover:bg-yellow-700 text-white text-xs px-2 py-1 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-400"
               title="Edit card"
+              aria-label={`Edit "${card.title}"`}
             >
               Edit
             </button>
             <button
               onClick={handleDelete}
-              className="bg-red-600 hover:bg-red-700 text-white text-xs px-2 py-1 rounded transition-colors"
+              className="bg-red-600 hover:bg-red-700 text-white text-xs px-2 py-1 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-red-400"
               title="Delete card"
+              aria-label={`Delete "${card.title}"`}
             >
               Delete
             </button>
