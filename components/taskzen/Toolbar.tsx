@@ -36,14 +36,20 @@ export default function Toolbar({ searchQuery, onSearchChange }: ToolbarProps) {
   }, []);
 
   const toggleMenu = () => {
-    if (!isMenuOpen && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      setButtonPosition({
-        top: rect.bottom + window.scrollY + 8,
-        right: window.innerWidth - rect.right - window.scrollX
-      });
+    if (isMenuOpen) {
+      // If menu is open, just close it
+      setIsMenuOpen(false);
+    } else {
+      // If menu is closed, calculate position and open it
+      if (buttonRef.current) {
+        const rect = buttonRef.current.getBoundingClientRect();
+        setButtonPosition({
+          top: rect.bottom + window.scrollY + 8,
+          right: window.innerWidth - rect.right - window.scrollX
+        });
+      }
+      setIsMenuOpen(true);
     }
-    setIsMenuOpen(!isMenuOpen);
   };
 
   const handleExport = async () => {
