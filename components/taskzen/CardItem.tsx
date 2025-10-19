@@ -7,11 +7,13 @@ import { Card, ColumnId } from '@/lib/taskzen/types';
 interface CardItemProps {
   card: Card;
   columnId: ColumnId;
+  onEditStateChange?: (isEditing: boolean) => void;
 }
 
 export default function CardItem({
   card,
   columnId,
+  onEditStateChange,
 }: CardItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(card.title);
@@ -37,6 +39,7 @@ export default function CardItem({
     setIsEditing(true);
     setEditTitle(card.title);
     setEditDescription(card.description || '');
+    onEditStateChange?.(true);
   };
 
   const handleCancel = () => {
@@ -44,6 +47,7 @@ export default function CardItem({
     setIsEditing(false);
     setEditTitle(card.title);
     setEditDescription(card.description || '');
+    onEditStateChange?.(false);
   };
 
   const handleSave = async () => {
@@ -56,6 +60,7 @@ export default function CardItem({
         description: editDescription.trim() || undefined,
       });
       setIsEditing(false);
+      onEditStateChange?.(false);
     } finally {
       setIsProcessing(false);
     }

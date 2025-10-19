@@ -17,7 +17,12 @@ interface ColumnProps {
 }
 
 // Draggable Card Component
-function DraggableCard({ card, columnId }: { card: any; columnId: ColumnId }) {
+function DraggableCard({ card, columnId, isEditing, onEditStateChange }: { 
+  card: any; 
+  columnId: ColumnId; 
+  isEditing: boolean;
+  onEditStateChange: (cardId: string, isEditing: boolean) => void;
+}) {
   const {
     attributes,
     listeners,
@@ -25,7 +30,10 @@ function DraggableCard({ card, columnId }: { card: any; columnId: ColumnId }) {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: card.id });
+  } = useSortable({ 
+    id: card.id,
+    disabled: isEditing // Disable dragging when editing
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -40,21 +48,28 @@ function DraggableCard({ card, columnId }: { card: any; columnId: ColumnId }) {
       {...attributes}
       className="relative"
     >
-      <CardItem card={card} columnId={columnId} />
-      {/* Drag Handle - positioned to avoid edit button */}
-      <div
-        {...listeners}
-        className="absolute left-0 top-0 bottom-0 w-3/4 cursor-grab active:cursor-grabbing z-0"
-        style={{ 
-          background: 'transparent',
-        }}
+      <CardItem 
+        card={card} 
+        columnId={columnId} 
+        onEditStateChange={(editing) => onEditStateChange(card.id, editing)}
       />
+      {/* Drag Handle - only show when not editing */}
+      {!isEditing && (
+        <div
+          {...listeners}
+          className="absolute left-0 top-0 bottom-0 w-3/4 cursor-grab active:cursor-grabbing z-0"
+          style={{ 
+            background: 'transparent',
+          }}
+        />
+      )}
     </div>
   );
 }
 
 export default function Column({ columnId, title, searchQuery }: ColumnProps) {
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingCardId, setEditingCardId] = useState<string | null>(null);
   const { columns, cards } = useTaskzenStore();
   
   // Apply search filter if there's a query
@@ -78,6 +93,14 @@ export default function Column({ columnId, title, searchQuery }: ColumnProps) {
 
   const handleFormCancel = () => {
     setShowAddForm(false);
+  };
+
+  const handleEditStateChange = (cardId: string, isEditing: boolean) => {
+    if (isEditing) {
+      setEditingCardId(cardId);
+    } else {
+      setEditingCardId(null);
+    }
   };
 
 
@@ -176,6 +199,8 @@ export default function Column({ columnId, title, searchQuery }: ColumnProps) {
               key={card.id}
               card={card}
               columnId={columnId}
+              isEditing={editingCardId === card.id}
+              onEditStateChange={handleEditStateChange}
             />
           ))
         )}
