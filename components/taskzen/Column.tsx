@@ -199,59 +199,63 @@ export default function Column({ columnId, title, searchQuery, activeCardId, dra
         </div>
       )}
       
-      {/* Cards List */}
-      <div className="relative z-10 flex-1 space-y-4" ref={setDroppableRef}>
-        {filteredCards.length === 0 ? (
-          <div className="text-center py-12">
-            {!showAddForm && (
-              <div className="text-6xl mb-4 opacity-50">
-                {searchQuery ? '🔍' : getColumnIcon(columnId)}
-              </div>
-            )}
-            {searchQuery && (
-              <p className="text-slate-300 text-lg font-medium mb-2">
-                No tasks match "{searchQuery}"
-              </p>
-            )}
-            {!searchQuery && !showAddForm && (
-              <p className="text-slate-400 text-sm">
-                Click "Add Card" to get started
-              </p>
-            )}
-          </div>
-        ) : (
-          (() => {
-            const cardsWithPlaceholder: (Card | null)[] = [...filteredCards];
-            
-            // Insert placeholder at the correct position if this column should show it
-            if (shouldShowPlaceholder && activeCardId) {
-              // Ensure position is within bounds
-              const maxPosition = cardsWithPlaceholder.length;
-              const safePosition = Math.min(Math.max(placeholderPosition, 0), maxPosition);
-              cardsWithPlaceholder.splice(safePosition, 0, null);
-            }
-            
-            return cardsWithPlaceholder.map((card, index) => {
-              // Render placeholder
-              if (card === null) {
-                return <PlaceholderCard key={`placeholder-${columnId}-${placeholderPosition}`} />;
+          {/* Cards List */}
+          <div className="relative z-10 flex-1 space-y-4" ref={setDroppableRef}>
+            {(() => {
+              const cardsWithPlaceholder: (Card | null)[] = [...filteredCards];
+              
+              // Insert placeholder at the correct position if this column should show it
+              if (shouldShowPlaceholder && activeCardId) {
+                // Ensure position is within bounds
+                const maxPosition = cardsWithPlaceholder.length;
+                const safePosition = Math.min(Math.max(placeholderPosition, 0), maxPosition);
+                cardsWithPlaceholder.splice(safePosition, 0, null);
               }
               
-              // Render actual card
-              return (
-                <DraggableCard
-                  key={card.id}
-                  card={card}
-                  columnId={columnId}
-                  isEditing={editingCardId === card.id}
-                  onEditStateChange={handleEditStateChange}
-                  activeCardId={activeCardId}
-                />
-              );
-            });
-          })()
-        )}
-      </div>
+              // If no cards and no placeholder, show empty state
+              if (cardsWithPlaceholder.length === 0) {
+                return (
+                  <div className="text-center py-12">
+                    {!showAddForm && (
+                      <div className="text-6xl mb-4 opacity-50">
+                        {searchQuery ? '🔍' : getColumnIcon(columnId)}
+                      </div>
+                    )}
+                    {searchQuery && (
+                      <p className="text-slate-300 text-lg font-medium mb-2">
+                        No tasks match "{searchQuery}"
+                      </p>
+                    )}
+                    {!searchQuery && !showAddForm && (
+                      <p className="text-slate-400 text-sm">
+                        Click "Add Card" to get started
+                      </p>
+                    )}
+                  </div>
+                );
+              }
+              
+              // Render cards and placeholder
+              return cardsWithPlaceholder.map((card, index) => {
+                // Render placeholder
+                if (card === null) {
+                  return <PlaceholderCard key={`placeholder-${columnId}-${placeholderPosition}`} />;
+                }
+                
+                // Render actual card
+                return (
+                  <DraggableCard
+                    key={card.id}
+                    card={card}
+                    columnId={columnId}
+                    isEditing={editingCardId === card.id}
+                    onEditStateChange={handleEditStateChange}
+                    activeCardId={activeCardId}
+                  />
+                );
+              });
+            })()}
+          </div>
     </div>
   );
 }

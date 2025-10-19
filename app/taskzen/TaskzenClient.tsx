@@ -142,18 +142,14 @@ export default function TaskzenClient() {
       if (activeColumn !== overColumn) {
         moveCard(activeId, overColumn);
       } else {
-        // Same column reordering - handle with position adjustment
+        // Same column reordering - use the placeholder position directly
         const activeIndex = columns[activeColumn].cardOrder.indexOf(activeId);
-        const overIndex = columns[overColumn].cardOrder.indexOf(overId);
         
-        // Adjust position if we're dragging down (to account for placeholder)
-        let adjustedPosition = overIndex;
-        if (activeIndex < overIndex) {
-          adjustedPosition = overIndex - 1;
-        }
+        // Use the dragOverInfo position directly (this is where the placeholder shows)
+        const targetPosition = dragOverInfo?.position || 0;
         
-        if (activeIndex !== adjustedPosition) {
-          reorderCard(activeColumn, activeId, adjustedPosition);
+        if (activeIndex !== targetPosition) {
+          reorderCard(activeColumn, activeId, targetPosition);
         }
       }
     }
