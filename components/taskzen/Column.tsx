@@ -38,10 +38,17 @@ function DraggableCard({ card, columnId }: { card: any; columnId: ColumnId }) {
       ref={setNodeRef}
       style={style}
       {...attributes}
-      {...listeners}
-      className="cursor-grab active:cursor-grabbing"
+      className="relative"
     >
       <CardItem card={card} columnId={columnId} />
+      {/* Drag Handle - positioned to avoid edit button */}
+      <div
+        {...listeners}
+        className="absolute left-0 top-0 bottom-0 w-3/4 cursor-grab active:cursor-grabbing z-0"
+        style={{ 
+          background: 'transparent',
+        }}
+      />
     </div>
   );
 }
