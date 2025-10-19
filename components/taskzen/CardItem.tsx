@@ -8,17 +8,18 @@ interface CardItemProps {
   card: Card;
   columnId: ColumnId;
   onEditStateChange?: (isEditing: boolean) => void;
+  isHovered?: boolean;
 }
 
 export default function CardItem({
   card,
   columnId,
   onEditStateChange,
+  isHovered = false,
 }: CardItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(card.title);
   const [editDescription, setEditDescription] = useState(card.description || '');
-  const [showEditButton, setShowEditButton] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   
   const editFormRef = useRef<HTMLFormElement>(null);
@@ -161,8 +162,6 @@ export default function CardItem({
   return (
     <div
       className="group relative backdrop-blur-sm bg-white/10 border border-white/20 rounded-xl p-4 hover:bg-white/15 hover:border-white/30 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-      onMouseEnter={() => setShowEditButton(true)}
-      onMouseLeave={() => setShowEditButton(false)}
     >
       {/* Card Content */}
       <div className="flex items-start justify-between">
@@ -178,7 +177,7 @@ export default function CardItem({
         </div>
         
         {/* Edit Button - positioned on the right */}
-        {showEditButton && (
+        {isHovered && (
           <button
             onClick={handleEdit}
             disabled={isProcessing}

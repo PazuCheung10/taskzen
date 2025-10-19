@@ -23,6 +23,8 @@ function DraggableCard({ card, columnId, isEditing, onEditStateChange }: {
   isEditing: boolean;
   onEditStateChange: (cardId: string, isEditing: boolean) => void;
 }) {
+  const [isHovered, setIsHovered] = useState(false);
+  
   const {
     attributes,
     listeners,
@@ -47,11 +49,14 @@ function DraggableCard({ card, columnId, isEditing, onEditStateChange }: {
       style={style}
       {...attributes}
       className="relative"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <CardItem 
         card={card} 
         columnId={columnId} 
         onEditStateChange={(editing) => onEditStateChange(card.id, editing)}
+        isHovered={isHovered}
       />
       {/* Drag Handle - only show when not editing */}
       {!isEditing && (
@@ -60,6 +65,7 @@ function DraggableCard({ card, columnId, isEditing, onEditStateChange }: {
           className="absolute left-0 top-0 bottom-0 w-3/4 cursor-grab active:cursor-grabbing z-0"
           style={{ 
             background: 'transparent',
+            pointerEvents: 'auto',
           }}
         />
       )}
