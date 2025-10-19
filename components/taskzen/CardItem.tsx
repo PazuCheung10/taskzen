@@ -29,6 +29,7 @@ export default function CardItem({
   const [editTitle, setEditTitle] = useState(card.title);
   const [editDescription, setEditDescription] = useState(card.description || '');
   const [showActions, setShowActions] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   
   const editFormRef = useRef<HTMLFormElement>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
@@ -44,25 +45,32 @@ export default function CardItem({
   }, [isEditing]);
 
   const handleEdit = () => {
+    if (isProcessing) return;
     setIsEditing(true);
     setEditTitle(card.title);
     setEditDescription(card.description || '');
   };
 
   const handleCancel = () => {
+    if (isProcessing) return;
     setIsEditing(false);
     setEditTitle(card.title);
     setEditDescription(card.description || '');
   };
 
-  const handleSave = () => {
-    if (!editTitle.trim()) return;
+  const handleSave = async () => {
+    if (!editTitle.trim() || isProcessing) return;
     
-    editCard(card.id, {
-      title: editTitle.trim(),
-      description: editDescription.trim() || undefined,
-    });
-    setIsEditing(false);
+    setIsProcessing(true);
+    try {
+      editCard(card.id, {
+        title: editTitle.trim(),
+        description: editDescription.trim() || undefined,
+      });
+      setIsEditing(false);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -75,25 +83,46 @@ export default function CardItem({
     }
   };
 
-  const handleDelete = () => {
-    if (confirm('Are you sure you want to delete this card?')) {
-      deleteCard(card.id);
+  const handleDelete = async () => {
+    if (isProcessing) return;
+    
+    if (confirm(`Are you sure you want to delete "${card.title}"? This action cannot be undone.`)) {
+      setIsProcessing(true);
+      try {
+        deleteCard(card.id);
+      } finally {
+        setIsProcessing(false);
+      }
     }
   };
 
-  const handleMoveLeft = () => {
-    const columnOrder: ColumnId[] = ['todo', 'doing', 'done'];
-    const currentIndex = columnOrder.indexOf(columnId);
-    if (currentIndex > 0) {
-      moveCard(card.id, columnOrder[currentIndex - 1]);
+  const handleMoveLeft = async () => {
+    if (isProcessing || !canMoveLeft) return;
+    
+    setIsProcessing(true);
+    try {
+      const columnOrder: ColumnId[] = ['todo', 'doing', 'done'];
+      const currentIndex = columnOrder.indexOf(columnId);
+      if (currentIndex > 0) {
+        moveCard(card.id, columnOrder[currentIndex - 1]);
+      }
+    } finally {
+      setIsProcessing(false);
     }
   };
 
-  const handleMoveRight = () => {
-    const columnOrder: ColumnId[] = ['todo', 'doing', 'done'];
-    const currentIndex = columnOrder.indexOf(columnId);
-    if (currentIndex < columnOrder.length - 1) {
-      moveCard(card.id, columnOrder[currentIndex + 1]);
+  const handleMoveRight = async () => {
+    if (isProcessing || !canMoveRight) return;
+    
+    setIsProcessing(true);
+    try {
+      const columnOrder: ColumnId[] = ['todo', 'doing', 'done'];
+      const currentIndex = columnOrder.indexOf(columnId);
+      if (currentIndex < columnOrder.length - 1) {
+        moveCard(card.id, columnOrder[currentIndex + 1]);
+      }
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -124,15 +153,17 @@ export default function CardItem({
             <button
               type="button"
               onClick={handleSave}
-              className="bg-green-600 hover:bg-green-700 text-white text-xs px-2 py-1 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-green-400"
+              disabled={!editTitle.trim() || isProcessing}
+              className="bg-green-600 hover:bg-green-700 disabled:bg-slate-500 disabled:cursor-not-allowed text-white text-xs px-2 py-1 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-green-400"
               aria-label="Save changes"
             >
-              Save
+              {isProcessing ? 'Saving...' : 'Save'}
             </button>
             <button
               type="button"
               onClick={handleCancel}
-              className="bg-slate-500 hover:bg-slate-400 text-white text-xs px-2 py-1 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400"
+              disabled={isProcessing}
+              className="bg-slate-500 hover:bg-slate-400 disabled:bg-slate-600 disabled:cursor-not-allowed text-white text-xs px-2 py-1 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400"
               aria-label="Cancel editing"
             >
               Cancel
@@ -169,7 +200,7 @@ export default function CardItem({
           <div className="flex gap-1">
             <button
               onClick={onMoveUp}
-              disabled={!canMoveUp}
+              disabled={!canMoveUp || isProcessing}
               className="bg-slate-500 hover:bg-slate-400 disabled:bg-slate-700 disabled:cursor-not-allowed text-white text-xs px-2 py-1 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400"
               title="Move up"
               aria-label={`Move "${card.title}" up in ${columnId} column`}
@@ -178,7 +209,7 @@ export default function CardItem({
             </button>
             <button
               onClick={onMoveDown}
-              disabled={!canMoveDown}
+              disabled={!canMoveDown || isProcessing}
               className="bg-slate-500 hover:bg-slate-400 disabled:bg-slate-700 disabled:cursor-not-allowed text-white text-xs px-2 py-1 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400"
               title="Move down"
               aria-label={`Move "${card.title}" down in ${columnId} column`}
@@ -191,21 +222,21 @@ export default function CardItem({
           <div className="flex gap-1">
             <button
               onClick={handleMoveLeft}
-              disabled={!canMoveLeft}
+              disabled={!canMoveLeft || isProcessing}
               className="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:cursor-not-allowed text-white text-xs px-2 py-1 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
               title="Move left"
               aria-label={`Move "${card.title}" to previous column`}
             >
-              ← Move
+              {isProcessing ? '...' : '← Move'}
             </button>
             <button
               onClick={handleMoveRight}
-              disabled={!canMoveRight}
+              disabled={!canMoveRight || isProcessing}
               className="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:cursor-not-allowed text-white text-xs px-2 py-1 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
               title="Move right"
               aria-label={`Move "${card.title}" to next column`}
             >
-              Move →
+              {isProcessing ? '...' : 'Move →'}
             </button>
           </div>
 
@@ -213,7 +244,8 @@ export default function CardItem({
           <div className="flex gap-1">
             <button
               onClick={handleEdit}
-              className="bg-yellow-600 hover:bg-yellow-700 text-white text-xs px-2 py-1 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              disabled={isProcessing}
+              className="bg-yellow-600 hover:bg-yellow-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white text-xs px-2 py-1 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-400"
               title="Edit card"
               aria-label={`Edit "${card.title}"`}
             >
@@ -221,11 +253,12 @@ export default function CardItem({
             </button>
             <button
               onClick={handleDelete}
-              className="bg-red-600 hover:bg-red-700 text-white text-xs px-2 py-1 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-red-400"
+              disabled={isProcessing}
+              className="bg-red-600 hover:bg-red-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white text-xs px-2 py-1 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-red-400"
               title="Delete card"
               aria-label={`Delete "${card.title}"`}
             >
-              Delete
+              {isProcessing ? '...' : 'Delete'}
             </button>
           </div>
         </div>

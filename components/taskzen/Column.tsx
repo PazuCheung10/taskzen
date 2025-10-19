@@ -37,6 +37,7 @@ export default function Column({ columnId, title, searchQuery }: ColumnProps) {
   };
 
   const handleAddCard = () => {
+    if (showAddForm) return; // Prevent multiple clicks
     setShowAddForm(true);
   };
 
@@ -59,10 +60,11 @@ export default function Column({ columnId, title, searchQuery }: ColumnProps) {
         </h2>
         <button
           onClick={handleAddCard}
-          className="bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-3 py-1 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400"
+          disabled={showAddForm}
+          className="bg-cyan-600 hover:bg-cyan-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white text-sm px-3 py-1 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400"
           aria-label={`Add new card to ${title} column`}
         >
-          + Add Card
+          {showAddForm ? 'Adding...' : '+ Add Card'}
         </button>
       </div>
       

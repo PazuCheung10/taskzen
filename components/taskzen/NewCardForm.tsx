@@ -33,6 +33,9 @@ export default function NewCardForm({ columnId, onSuccess, onCancel }: NewCardFo
       setTitle('');
       setDescription('');
       onSuccess?.();
+    } catch (error) {
+      console.error('Failed to add card:', error);
+      // Keep form open on error so user can retry
     } finally {
       setIsSubmitting(false);
     }
@@ -48,6 +51,7 @@ export default function NewCardForm({ columnId, onSuccess, onCancel }: NewCardFo
   };
 
   const handleCancel = () => {
+    if (isSubmitting) return;
     setTitle('');
     setDescription('');
     onCancel?.();

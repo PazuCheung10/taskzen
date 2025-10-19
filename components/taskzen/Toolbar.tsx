@@ -23,7 +23,19 @@ export default function Toolbar({ searchQuery, onSearchChange }: ToolbarProps) {
     try {
       const jsonData = exportJSON();
       await navigator.clipboard.writeText(jsonData);
-      alert('Board exported to clipboard! You can now paste it elsewhere.');
+      
+      // Show success feedback
+      const button = document.querySelector('[aria-label="Export board to clipboard"]') as HTMLButtonElement;
+      const originalText = button.textContent;
+      button.textContent = '✓ Copied!';
+      button.classList.add('bg-green-600', 'hover:bg-green-700');
+      button.classList.remove('bg-green-600', 'hover:bg-green-700');
+      
+      setTimeout(() => {
+        button.textContent = originalText;
+        button.classList.remove('bg-green-600', 'hover:bg-green-700');
+        button.classList.add('bg-green-600', 'hover:bg-green-700');
+      }, 2000);
     } catch (error) {
       console.error('Failed to copy to clipboard:', error);
       alert('Failed to copy to clipboard. Please try again.');
@@ -72,7 +84,19 @@ export default function Toolbar({ searchQuery, onSearchChange }: ToolbarProps) {
       
       // Import the validated data
       importJSON(data.board);
-      alert('Board imported successfully!');
+      
+      // Show success feedback
+      const button = document.querySelector('[aria-label="Import board from JSON file"]') as HTMLButtonElement;
+      const originalText = button.textContent;
+      button.textContent = '✓ Imported!';
+      button.classList.add('bg-green-600', 'hover:bg-green-700');
+      button.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+      
+      setTimeout(() => {
+        button.textContent = originalText;
+        button.classList.remove('bg-green-600', 'hover:bg-green-700');
+        button.classList.add('bg-blue-600', 'hover:bg-blue-700');
+      }, 2000);
       
     } catch (error) {
       console.error('Import failed:', error);
@@ -89,7 +113,19 @@ export default function Toolbar({ searchQuery, onSearchChange }: ToolbarProps) {
   const handleClearAll = () => {
     if (confirm('Are you sure you want to clear all cards? This action cannot be undone.')) {
       clearAll();
-      alert('All cards have been cleared.');
+      
+      // Show success feedback
+      const button = document.querySelector('[aria-label="Clear all cards from board"]') as HTMLButtonElement;
+      const originalText = button.textContent;
+      button.textContent = '✓ Cleared!';
+      button.classList.add('bg-green-600', 'hover:bg-green-700');
+      button.classList.remove('bg-red-600', 'hover:bg-red-700');
+      
+      setTimeout(() => {
+        button.textContent = originalText;
+        button.classList.remove('bg-green-600', 'hover:bg-green-700');
+        button.classList.add('bg-red-600', 'hover:bg-red-700');
+      }, 2000);
     }
   };
 
