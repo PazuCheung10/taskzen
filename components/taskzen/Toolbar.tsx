@@ -124,9 +124,9 @@ export default function Toolbar({ searchQuery, onSearchChange }: ToolbarProps) {
 
   return (
     <div className="backdrop-blur-lg bg-white/10 border border-white/20 rounded-2xl p-6 shadow-2xl">
-      <div className={`flex flex-col sm:flex-row gap-6 items-center transition-all duration-500 ${isMenuOpen ? 'sm:flex-col' : ''}`}>
+      <div className="flex flex-col sm:flex-row gap-6 items-center">
         {/* Search Input */}
-        <div className={`relative transition-all duration-500 ${isMenuOpen ? 'w-full' : 'flex-1 w-full sm:w-auto'}`}>
+        <div className={`relative transition-all duration-500 ${isMenuOpen ? 'flex-1' : 'flex-1'}`}>
           <label htmlFor="search-input" className="sr-only">
             Search cards
           </label>
