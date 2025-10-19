@@ -15,11 +15,11 @@ interface ColumnProps {
 
 export default function Column({ columnId, title, searchQuery }: ColumnProps) {
   const [showAddForm, setShowAddForm] = useState(false);
-  const { columns, reorderCard } = useTaskzenStore();
+  const { columns, cards, reorderCard } = useTaskzenStore();
   
   // Apply search filter if there's a query
-  const filteredBoard = searchQuery ? filterBoard({ columns }, searchQuery) : { columns };
-  const cards = selectCardsInColumn(filteredBoard, columnId);
+  const filteredBoard = searchQuery ? filterBoard({ columns, cards }, searchQuery) : { columns, cards };
+  const filteredCards = selectCardsInColumn(filteredBoard, columnId);
 
   const handleMoveUp = (cardId: string) => {
     const currentIndex = columns[columnId].cardOrder.indexOf(cardId);
@@ -30,7 +30,7 @@ export default function Column({ columnId, title, searchQuery }: ColumnProps) {
 
   const handleMoveDown = (cardId: string) => {
     const currentIndex = columns[columnId].cardOrder.indexOf(cardId);
-    const originalCards = selectCardsInColumn({ columns }, columnId);
+    const originalCards = selectCardsInColumn({ columns, cards }, columnId);
     if (currentIndex < originalCards.length - 1) {
       reorderCard(columnId, cardId, currentIndex + 1);
     }
@@ -94,7 +94,7 @@ export default function Column({ columnId, title, searchQuery }: ColumnProps) {
               {title}
             </h2>
             <p className="text-sm text-slate-300 font-medium">
-              {cards.length} {cards.length === 1 ? 'task' : 'tasks'}
+              {filteredCards.length} {filteredCards.length === 1 ? 'task' : 'tasks'}
             </p>
           </div>
         </div>
@@ -124,7 +124,7 @@ export default function Column({ columnId, title, searchQuery }: ColumnProps) {
       
       {/* Cards List */}
       <div className="relative z-10 flex-1 space-y-4">
-        {cards.length === 0 ? (
+        {filteredCards.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-6xl mb-4 opacity-50">
               {searchQuery ? '🔍' : showAddForm ? '📝' : getColumnIcon(columnId)}
@@ -145,7 +145,7 @@ export default function Column({ columnId, title, searchQuery }: ColumnProps) {
             )}
           </div>
         ) : (
-          cards.map((card, index) => (
+          filteredCards.map((card, index) => (
             <CardItem
               key={card.id}
               card={card}
@@ -153,7 +153,7 @@ export default function Column({ columnId, title, searchQuery }: ColumnProps) {
               canMoveLeft={canMoveLeft}
               canMoveRight={canMoveRight}
               canMoveUp={index > 0}
-              canMoveDown={index < cards.length - 1}
+              canMoveDown={index < filteredCards.length - 1}
               onMoveUp={() => handleMoveUp(card.id)}
               onMoveDown={() => handleMoveDown(card.id)}
             />
