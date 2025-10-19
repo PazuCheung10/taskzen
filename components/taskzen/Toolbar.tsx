@@ -124,9 +124,9 @@ export default function Toolbar({ searchQuery, onSearchChange }: ToolbarProps) {
 
   return (
     <div className="backdrop-blur-lg bg-white/10 border border-white/20 rounded-2xl p-6 shadow-2xl">
-      <div className="flex flex-col sm:flex-row gap-6 items-center">
+      <div className={`flex flex-col sm:flex-row gap-6 items-center transition-all duration-500 ${isMenuOpen ? 'sm:flex-col' : ''}`}>
         {/* Search Input */}
-        <div className="flex-1 w-full sm:w-auto relative">
+        <div className={`relative transition-all duration-500 ${isMenuOpen ? 'w-full' : 'flex-1 w-full sm:w-auto'}`}>
           <label htmlFor="search-input" className="sr-only">
             Search cards
           </label>
@@ -138,10 +138,10 @@ export default function Toolbar({ searchQuery, onSearchChange }: ToolbarProps) {
               onChange={(e) => onSearchChange(e.target.value)}
               onKeyDown={handleSearchKeyDown}
               placeholder="Search cards by title or description..."
-              className="w-full px-6 py-4 bg-white/10 border border-white/20 rounded-xl text-slate-100 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 backdrop-blur-sm transition-all duration-300"
+              className="w-full pl-12 pr-4 py-4 bg-white/10 border border-white/20 rounded-xl text-slate-100 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 backdrop-blur-sm transition-all duration-300"
               aria-label="Search cards by title or description"
             />
-            <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400">
+            <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 pointer-events-none">
               🔍
             </div>
             {searchQuery && (
@@ -157,13 +157,13 @@ export default function Toolbar({ searchQuery, onSearchChange }: ToolbarProps) {
         </div>
 
         {/* Action Menu */}
-        <div className="relative" ref={menuRef}>
+        <div className={`relative transition-all duration-500 ${isMenuOpen ? 'w-full' : ''}`} ref={menuRef}>
           <button
             onClick={toggleMenu}
-            className="group relative overflow-hidden bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-slate-400/50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            className={`group relative overflow-hidden bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-500 focus:outline-none focus:ring-2 focus:ring-slate-400/50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${isMenuOpen ? 'w-full' : 'w-auto'}`}
             aria-label="Open actions menu"
           >
-            <span className="relative z-10 flex items-center gap-2">
+            <span className="relative z-10 flex items-center justify-center gap-2">
               ⚙️ Actions
             </span>
             <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -171,7 +171,7 @@ export default function Toolbar({ searchQuery, onSearchChange }: ToolbarProps) {
 
           {/* Dropdown Menu */}
           {isMenuOpen && (
-            <div className="absolute right-0 top-full mt-2 w-48 backdrop-blur-lg bg-white/10 border border-white/20 rounded-xl shadow-2xl z-50 animate-in slide-in-from-top-2 duration-200">
+            <div className={`absolute top-full mt-2 backdrop-blur-lg bg-white/10 border border-white/20 rounded-xl shadow-2xl z-50 animate-in slide-in-from-top-2 duration-200 ${isMenuOpen ? 'w-full' : 'w-48 right-0'}`}>
               <div className="p-2 space-y-1">
                 <button
                   onClick={handleExport}
