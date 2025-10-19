@@ -157,7 +157,7 @@ export default function Toolbar({ searchQuery, onSearchChange }: ToolbarProps) {
         </div>
 
         {/* Action Menu Dropdown */}
-        <div className="relative" ref={menuRef}>
+        <div className="relative z-[10000]" ref={menuRef}>
           <button
             onClick={toggleMenu}
             className="group relative overflow-hidden bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-white font-semibold py-4 px-4 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-slate-400/50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
@@ -171,7 +171,7 @@ export default function Toolbar({ searchQuery, onSearchChange }: ToolbarProps) {
 
           {/* Dropdown Menu */}
           {isMenuOpen && (
-            <div className="absolute right-0 top-full mt-2 w-48 bg-white/95 backdrop-blur-lg border border-white/20 rounded-xl shadow-2xl z-50 overflow-hidden">
+            <div className="absolute right-0 top-full mt-2 w-48 bg-white/95 backdrop-blur-lg border border-white/20 rounded-xl shadow-2xl z-[9999] overflow-hidden">
               <div className="py-2">
                 <button
                   onClick={handleExport}
