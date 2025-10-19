@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useTaskzenStore } from '@/lib/taskzen/store';
 import { Board } from '@/lib/taskzen/types';
 
@@ -13,8 +14,10 @@ export default function Toolbar({ searchQuery, onSearchChange }: ToolbarProps) {
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [buttonPosition, setButtonPosition] = useState({ top: 0, right: 0 });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   
   const { clearAll, importJSON, exportJSON } = useTaskzenStore();
 
@@ -33,6 +36,13 @@ export default function Toolbar({ searchQuery, onSearchChange }: ToolbarProps) {
   }, []);
 
   const toggleMenu = () => {
+    if (!isMenuOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setButtonPosition({
+        top: rect.bottom + window.scrollY + 8,
+        right: window.innerWidth - rect.right - window.scrollX
+      });
+    }
     setIsMenuOpen(!isMenuOpen);
   };
 
@@ -159,6 +169,7 @@ export default function Toolbar({ searchQuery, onSearchChange }: ToolbarProps) {
         {/* Action Menu Dropdown */}
         <div className="relative z-[10000]" ref={menuRef}>
           <button
+            ref={buttonRef}
             onClick={toggleMenu}
             className="group relative overflow-hidden bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-white font-semibold py-4 px-4 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-slate-400/50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             aria-label="Open actions menu"
@@ -169,9 +180,16 @@ export default function Toolbar({ searchQuery, onSearchChange }: ToolbarProps) {
             <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </button>
 
-          {/* Dropdown Menu */}
-          {isMenuOpen && (
-            <div className="absolute right-0 top-full mt-2 w-48 bg-white/95 backdrop-blur-lg border border-white/20 rounded-xl shadow-2xl z-[9999] overflow-hidden">
+          {/* Dropdown Menu - Rendered via Portal */}
+          {isMenuOpen && typeof window !== 'undefined' && createPortal(
+            <div 
+              className="fixed w-48 bg-white/95 backdrop-blur-lg border border-white/20 rounded-xl shadow-2xl overflow-hidden z-[99999]"
+              style={{
+                top: `${buttonPosition.top}px`,
+                right: `${buttonPosition.right}px`
+              }}
+              ref={menuRef}
+            >
               <div className="py-2">
                 <button
                   onClick={handleExport}
@@ -202,7 +220,8 @@ export default function Toolbar({ searchQuery, onSearchChange }: ToolbarProps) {
                   <span>Clear All</span>
                 </button>
               </div>
-            </div>
+            </div>,
+            document.body
           )}
         </div>
       </div>
