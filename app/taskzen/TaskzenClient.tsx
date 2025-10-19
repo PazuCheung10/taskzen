@@ -18,6 +18,50 @@ export default function TaskzenClient() {
   const [searchQuery, setSearchQuery] = useState('');
   const { moveCard, reorderCard, columns, cards } = useTaskzenStore();
 
+  const handleDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+    
+    if (!over) return;
+
+    const activeId = active.id as string;
+    const overId = over.id as string;
+
+    // Find which column the active card is in
+    let activeColumn: ColumnId | null = null;
+    for (const [columnId, column] of Object.entries(columns)) {
+      if (column.cardOrder.includes(activeId)) {
+        activeColumn = columnId as ColumnId;
+        break;
+      }
+    }
+
+    if (!activeColumn) return;
+
+    // If hovering over another card
+    if (activeId !== overId) {
+      // Find which column the over card is in
+      let overColumn: ColumnId | null = null;
+      for (const [columnId, column] of Object.entries(columns)) {
+        if (column.cardOrder.includes(overId)) {
+          overColumn = columnId as ColumnId;
+          break;
+        }
+      }
+
+      if (!overColumn) return;
+
+      // If reordering within same column
+      if (activeColumn === overColumn) {
+        const activeIndex = columns[activeColumn].cardOrder.indexOf(activeId);
+        const overIndex = columns[overColumn].cardOrder.indexOf(overId);
+        
+        if (activeIndex !== overIndex) {
+          reorderCard(activeColumn, activeId, overIndex);
+        }
+      }
+    }
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     
@@ -46,13 +90,22 @@ export default function TaskzenClient() {
       return;
     }
 
-    // If dropping on another card (reordering within same column)
-    if (activeColumn && activeId !== overId) {
-      const activeIndex = columns[activeColumn].cardOrder.indexOf(activeId);
-      const overIndex = columns[activeColumn].cardOrder.indexOf(overId);
-      
-      if (activeIndex !== overIndex) {
-        reorderCard(activeColumn, activeId, overIndex);
+    // If dropping on another card
+    if (activeId !== overId) {
+      // Find which column the over card is in
+      let overColumn: ColumnId | null = null;
+      for (const [columnId, column] of Object.entries(columns)) {
+        if (column.cardOrder.includes(overId)) {
+          overColumn = columnId as ColumnId;
+          break;
+        }
+      }
+
+      if (!overColumn) return;
+
+      // If moving between columns
+      if (activeColumn !== overColumn) {
+        moveCard(activeId, overColumn);
       }
     }
   };
@@ -89,6 +142,7 @@ export default function TaskzenClient() {
           {/* Columns Grid */}
           <DndContext
             collisionDetection={closestCenter}
+            onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
           >
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
