@@ -157,56 +157,69 @@ export default function Toolbar({ searchQuery, onSearchChange }: ToolbarProps) {
         </div>
 
         {/* Action Menu */}
-        <div className={`relative transition-all duration-500 ${isMenuOpen ? 'w-full' : ''}`} ref={menuRef}>
-          <button
-            onClick={toggleMenu}
-            className={`group relative overflow-hidden bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-500 focus:outline-none focus:ring-2 focus:ring-slate-400/50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${isMenuOpen ? 'w-full' : 'w-auto'}`}
-            aria-label="Open actions menu"
-          >
-            <span className="relative z-10 flex items-center justify-center gap-2">
-              ⚙️ Actions
-            </span>
-            <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          </button>
+        <div className={`relative transition-all duration-500 ${isMenuOpen ? 'flex-1' : 'w-auto'}`} ref={menuRef}>
+          {/* Single Actions Button - Always present but with opacity/transform */}
+          <div className={`absolute inset-0 transition-all duration-500 ${isMenuOpen ? 'opacity-0 pointer-events-none' : 'opacity-100 pointer-events-auto'}`}>
+            <button
+              onClick={toggleMenu}
+              className="group relative overflow-hidden bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-slate-400/50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 w-full"
+              aria-label="Open actions menu"
+            >
+              <span className="relative z-10 flex items-center justify-center gap-2">
+                ⚙️ Actions
+              </span>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </button>
+          </div>
 
-          {/* Dropdown Menu */}
-          {isMenuOpen && (
-            <div className={`absolute top-full mt-2 backdrop-blur-lg bg-white/10 border border-white/20 rounded-xl shadow-2xl z-50 animate-in slide-in-from-top-2 duration-200 ${isMenuOpen ? 'w-full' : 'w-48 right-0'}`}>
-              <div className="p-2 space-y-1">
-                <button
-                  onClick={handleExport}
-                  disabled={isExporting}
-                  className="w-full group relative overflow-hidden bg-gradient-to-r from-emerald-500/20 to-teal-600/20 hover:from-emerald-500/30 hover:to-teal-600/30 disabled:from-slate-500/20 disabled:to-slate-600/20 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-400/50"
-                  aria-label="Export board to clipboard"
-                >
-                  <span className="relative z-10 flex items-center gap-3">
-                    {isExporting ? '⏳' : '📋'} {isExporting ? 'Exporting...' : 'Export Board'}
-                  </span>
-                </button>
+          {/* Expanded Buttons - Always present but with opacity/transform */}
+          <div className={`flex gap-2 w-full transition-all duration-500 ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+            <button
+              onClick={handleExport}
+              disabled={isExporting}
+              className="flex-1 group relative overflow-hidden bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 disabled:from-slate-500 disabled:to-slate-600 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              aria-label="Export board to clipboard"
+            >
+              <span className="relative z-10 flex items-center justify-center gap-2">
+                {isExporting ? '⏳' : '📋'} {isExporting ? 'Exporting...' : 'Export'}
+              </span>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </button>
 
-                <button
-                  onClick={handleImport}
-                  disabled={isImporting}
-                  className="w-full group relative overflow-hidden bg-gradient-to-r from-blue-500/20 to-indigo-600/20 hover:from-blue-500/30 hover:to-indigo-600/30 disabled:from-slate-500/20 disabled:to-slate-600/20 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400/50"
-                  aria-label="Import board from JSON file"
-                >
-                  <span className="relative z-10 flex items-center gap-3">
-                    {isImporting ? '⏳' : '📁'} {isImporting ? 'Importing...' : 'Import Board'}
-                  </span>
-                </button>
+            <button
+              onClick={handleImport}
+              disabled={isImporting}
+              className="flex-1 group relative overflow-hidden bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 disabled:from-slate-500 disabled:to-slate-600 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400/50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              aria-label="Import board from JSON file"
+            >
+              <span className="relative z-10 flex items-center justify-center gap-2">
+                {isImporting ? '⏳' : '📁'} {isImporting ? 'Importing...' : 'Import'}
+              </span>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </button>
 
-                <button
-                  onClick={handleClearAll}
-                  className="w-full group relative overflow-hidden bg-gradient-to-r from-red-500/20 to-pink-600/20 hover:from-red-500/30 hover:to-pink-600/30 text-white font-medium py-3 px-4 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-400/50"
-                  aria-label="Clear all cards from board"
-                >
-                  <span className="relative z-10 flex items-center gap-3">
-                    🗑️ Clear All
-                  </span>
-                </button>
-              </div>
-            </div>
-          )}
+            <button
+              onClick={handleClearAll}
+              className="flex-1 group relative overflow-hidden bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-400/50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              aria-label="Clear all cards from board"
+            >
+              <span className="relative z-10 flex items-center justify-center gap-2">
+                🗑️ Clear
+              </span>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </button>
+
+            <button
+              onClick={toggleMenu}
+              className="group relative overflow-hidden bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-400 hover:to-slate-500 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-slate-400/50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              aria-label="Close actions menu"
+            >
+              <span className="relative z-10 flex items-center justify-center gap-2">
+                ✕
+              </span>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </button>
+          </div>
         </div>
       </div>
 
