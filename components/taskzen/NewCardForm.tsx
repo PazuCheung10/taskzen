@@ -6,9 +6,11 @@ import { ColumnId } from '@/lib/taskzen/types';
 
 interface NewCardFormProps {
   columnId: ColumnId;
+  onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
-export default function NewCardForm({ columnId }: NewCardFormProps) {
+export default function NewCardForm({ columnId, onSuccess, onCancel }: NewCardFormProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -27,13 +29,10 @@ export default function NewCardForm({ columnId }: NewCardFormProps) {
         description: description.trim() || undefined,
       });
       
-      // Clear form and focus title input
+      // Clear form and call success callback
       setTitle('');
       setDescription('');
-      const titleInput = document.getElementById(`title-${columnId}`) as HTMLInputElement;
-      if (titleInput) {
-        titleInput.focus();
-      }
+      onSuccess?.();
     } finally {
       setIsSubmitting(false);
     }
@@ -42,7 +41,16 @@ export default function NewCardForm({ columnId }: NewCardFormProps) {
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && e.ctrlKey) {
       handleSubmit(e);
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      onCancel?.();
     }
+  };
+
+  const handleCancel = () => {
+    setTitle('');
+    setDescription('');
+    onCancel?.();
   };
 
   return (
@@ -80,16 +88,25 @@ export default function NewCardForm({ columnId }: NewCardFormProps) {
         />
       </div>
       
-      <button
-        type="submit"
-        disabled={!title.trim() || isSubmitting}
-        className="w-full bg-cyan-600 hover:bg-cyan-700 disabled:bg-slate-500 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400"
-      >
-        {isSubmitting ? 'Adding...' : 'Add Card'}
-      </button>
+      <div className="flex gap-2">
+        <button
+          type="submit"
+          disabled={!title.trim() || isSubmitting}
+          className="flex-1 bg-cyan-600 hover:bg-cyan-700 disabled:bg-slate-500 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400"
+        >
+          {isSubmitting ? 'Adding...' : 'Add Card'}
+        </button>
+        <button
+          type="button"
+          onClick={handleCancel}
+          className="bg-slate-500 hover:bg-slate-400 text-white font-medium py-2 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400"
+        >
+          Cancel
+        </button>
+      </div>
       
       <p className="text-xs text-slate-400 text-center">
-        Press Ctrl+Enter to submit
+        Press Ctrl+Enter to submit, Esc to cancel
       </p>
     </form>
   );
