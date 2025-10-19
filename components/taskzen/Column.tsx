@@ -50,7 +50,7 @@ export default function Column({ columnId, title, searchQuery }: ColumnProps) {
   };
 
   const canMoveLeft = columnId !== 'todo';
-  const canMoveRight = columnId !== 'done';
+  const canMoveRight = columnId !== 'done' && columnId !== 'archive';
 
   const getColumnGradient = (columnId: ColumnId) => {
     switch (columnId) {
@@ -60,6 +60,8 @@ export default function Column({ columnId, title, searchQuery }: ColumnProps) {
         return 'from-blue-500/30 to-indigo-500/30 border-blue-400/50 bg-blue-500/5';
       case 'done':
         return 'from-emerald-500/30 to-green-500/30 border-emerald-400/50 bg-emerald-500/5';
+      case 'archive':
+        return 'from-slate-500/30 to-gray-600/30 border-slate-400/50 bg-slate-500/5';
       default:
         return 'from-slate-500/30 to-slate-600/30 border-slate-400/50 bg-slate-500/5';
     }
@@ -73,6 +75,8 @@ export default function Column({ columnId, title, searchQuery }: ColumnProps) {
         return '⚡';
       case 'done':
         return '✅';
+      case 'archive':
+        return '📦';
       default:
         return '📋';
     }
