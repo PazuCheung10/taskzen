@@ -116,7 +116,7 @@ export default function Column({ columnId, title, searchQuery, activeCardId, dra
   };
 
   // Check if this column should show a placeholder
-  const shouldShowPlaceholder = dragOverInfo?.columnId === columnId;
+  const shouldShowPlaceholder = dragOverInfo?.columnId === columnId && activeCardId;
   const placeholderPosition = dragOverInfo?.position || 0;
 
   // Placeholder Component

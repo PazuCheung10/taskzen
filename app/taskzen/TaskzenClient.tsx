@@ -87,17 +87,8 @@ export default function TaskzenClient() {
 
       // If reordering within same column
       if (activeColumn === overColumn) {
-        const activeIndex = columns[activeColumn].cardOrder.indexOf(activeId);
-        
-        // Adjust position if we're dragging down (to account for placeholder)
-        let adjustedPosition = overIndex;
-        if (activeIndex < overIndex) {
-          adjustedPosition = overIndex - 1;
-        }
-        
-        if (activeIndex !== adjustedPosition) {
-          reorderCard(activeColumn, activeId, adjustedPosition);
-        }
+        // Don't call reorderCard here - let handleDragEnd handle it
+        // This prevents double-dodging with the placeholder
       }
     }
   };
@@ -150,6 +141,20 @@ export default function TaskzenClient() {
       // If moving between columns
       if (activeColumn !== overColumn) {
         moveCard(activeId, overColumn);
+      } else {
+        // Same column reordering - handle with position adjustment
+        const activeIndex = columns[activeColumn].cardOrder.indexOf(activeId);
+        const overIndex = columns[overColumn].cardOrder.indexOf(overId);
+        
+        // Adjust position if we're dragging down (to account for placeholder)
+        let adjustedPosition = overIndex;
+        if (activeIndex < overIndex) {
+          adjustedPosition = overIndex - 1;
+        }
+        
+        if (activeIndex !== adjustedPosition) {
+          reorderCard(activeColumn, activeId, adjustedPosition);
+        }
       }
     }
   };
