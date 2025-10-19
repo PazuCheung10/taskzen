@@ -158,11 +158,10 @@ export default function Toolbar({ searchQuery, onSearchChange }: ToolbarProps) {
 
         {/* Action Menu */}
         <div className={`relative transition-all duration-500 ${isMenuOpen ? 'flex-1' : 'w-auto'}`} ref={menuRef}>
-          {/* Single Actions Button - Always present but with opacity/transform */}
-          <div className={`absolute inset-0 transition-all duration-500 ${isMenuOpen ? 'opacity-0 pointer-events-none' : 'opacity-100 pointer-events-auto'}`}>
+          {!isMenuOpen ? (
             <button
               onClick={toggleMenu}
-              className="group relative overflow-hidden bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-slate-400/50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 w-full"
+              className="group relative overflow-hidden bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-white font-semibold py-4 px-4 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-slate-400/50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               aria-label="Open actions menu"
             >
               <span className="relative z-10 flex items-center justify-center gap-2">
@@ -170,14 +169,12 @@ export default function Toolbar({ searchQuery, onSearchChange }: ToolbarProps) {
               </span>
               <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </button>
-          </div>
-
-          {/* Expanded Buttons - Always present but with opacity/transform */}
-          <div className={`flex gap-2 w-full transition-all duration-500 ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+          ) : (
+            <div className="flex gap-2 w-full">
             <button
               onClick={handleExport}
               disabled={isExporting}
-              className="flex-1 group relative overflow-hidden bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 disabled:from-slate-500 disabled:to-slate-600 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              className="flex-1 group relative overflow-hidden bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 disabled:from-slate-500 disabled:to-slate-600 disabled:cursor-not-allowed text-white font-semibold py-4 px-4 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               aria-label="Export board to clipboard"
             >
               <span className="relative z-10 flex items-center justify-center gap-2">
@@ -189,7 +186,7 @@ export default function Toolbar({ searchQuery, onSearchChange }: ToolbarProps) {
             <button
               onClick={handleImport}
               disabled={isImporting}
-              className="flex-1 group relative overflow-hidden bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 disabled:from-slate-500 disabled:to-slate-600 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400/50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              className="flex-1 group relative overflow-hidden bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 disabled:from-slate-500 disabled:to-slate-600 disabled:cursor-not-allowed text-white font-semibold py-4 px-4 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400/50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               aria-label="Import board from JSON file"
             >
               <span className="relative z-10 flex items-center justify-center gap-2">
@@ -200,7 +197,7 @@ export default function Toolbar({ searchQuery, onSearchChange }: ToolbarProps) {
 
             <button
               onClick={handleClearAll}
-              className="flex-1 group relative overflow-hidden bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-400/50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              className="flex-1 group relative overflow-hidden bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white font-semibold py-4 px-4 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-400/50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               aria-label="Clear all cards from board"
             >
               <span className="relative z-10 flex items-center justify-center gap-2">
@@ -211,7 +208,7 @@ export default function Toolbar({ searchQuery, onSearchChange }: ToolbarProps) {
 
             <button
               onClick={toggleMenu}
-              className="group relative overflow-hidden bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-400 hover:to-slate-500 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-slate-400/50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              className="group relative overflow-hidden bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-400 hover:to-slate-500 text-white font-semibold py-4 px-4 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-slate-400/50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               aria-label="Close actions menu"
             >
               <span className="relative z-10 flex items-center justify-center gap-2">
@@ -219,7 +216,8 @@ export default function Toolbar({ searchQuery, onSearchChange }: ToolbarProps) {
               </span>
               <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </button>
-          </div>
+            </div>
+          )}
         </div>
       </div>
 
