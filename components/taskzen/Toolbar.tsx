@@ -184,8 +184,8 @@ export default function Toolbar({ searchQuery, onSearchChange }: ToolbarProps) {
             className="group relative overflow-hidden bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-white font-semibold py-4 px-4 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-slate-400/50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             aria-label="Open actions menu"
           >
-            <span className="relative z-10 flex items-center justify-center gap-2">
-              ⚙️ Actions
+            <span className="relative z-10 flex items-center justify-center">
+              ⚙️
             </span>
             <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </button>

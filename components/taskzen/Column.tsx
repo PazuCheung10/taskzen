@@ -88,7 +88,6 @@ export default function Column({ columnId, title, searchQuery }: ColumnProps) {
       </div>
       <div className="relative z-10 flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="text-2xl">{getColumnIcon(columnId)}</div>
           <div>
             <h2 className="text-2xl font-bold text-slate-100">
               {title}
@@ -132,8 +131,6 @@ export default function Column({ columnId, title, searchQuery }: ColumnProps) {
             <p className="text-slate-300 text-lg font-medium mb-2">
               {searchQuery ? (
                 `No tasks match "${searchQuery}"`
-              ) : showAddForm ? (
-                'Fill out the form above to add your first task'
               ) : (
                 'No tasks yet'
               )}
