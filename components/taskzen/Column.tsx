@@ -79,7 +79,7 @@ export default function Column({ columnId, title, searchQuery }: ColumnProps) {
   };
 
   return (
-    <div className={`backdrop-blur-lg bg-gradient-to-b ${getColumnGradient(columnId)} border rounded-2xl p-6 min-h-[600px] flex flex-col shadow-2xl hover:shadow-3xl transition-all duration-300 relative overflow-hidden`}>
+    <div className={`backdrop-blur-lg bg-gradient-to-b ${getColumnGradient(columnId)} border rounded-2xl p-6 min-h-[700px] sm:min-h-[750px] lg:min-h-[800px] flex flex-col shadow-2xl hover:shadow-3xl transition-all duration-300 relative overflow-hidden`}>
       {/* Column Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="w-full h-full" style={{
