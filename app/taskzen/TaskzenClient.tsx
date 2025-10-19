@@ -1,19 +1,61 @@
 'use client';
 
 import { useState } from 'react';
+import { DndContext, DragEndEvent, DragOverEvent, DragStartEvent, closestCenter } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import Column from '@/components/taskzen/Column';
 import Toolbar from '@/components/taskzen/Toolbar';
 import { ColumnId } from '@/lib/taskzen/types';
+import { useTaskzenStore } from '@/lib/taskzen/store';
 
 const COLUMNS: { id: ColumnId; title: string }[] = [
   { id: 'todo', title: 'Todo' },
   { id: 'doing', title: 'Doing' },
   { id: 'done', title: 'Done' },
-  { id: 'archive', title: 'Archive' },
 ];
 
 export default function TaskzenClient() {
   const [searchQuery, setSearchQuery] = useState('');
+  const { moveCard, reorderCard, columns, cards } = useTaskzenStore();
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (!over) return;
+
+    const activeId = active.id as string;
+    const overId = over.id as string;
+
+    // Find which column the active card is in
+    let activeColumn: ColumnId | null = null;
+    for (const [columnId, column] of Object.entries(columns)) {
+      if (column.cardOrder.includes(activeId)) {
+        activeColumn = columnId as ColumnId;
+        break;
+      }
+    }
+
+    if (!activeColumn) return;
+
+    // If dropping on a column
+    if (COLUMNS.some(col => col.id === overId)) {
+      const targetColumn = overId as ColumnId;
+      if (activeColumn !== targetColumn) {
+        moveCard(activeId, targetColumn);
+      }
+      return;
+    }
+
+    // If dropping on another card (reordering within same column)
+    if (activeColumn && activeId !== overId) {
+      const activeIndex = columns[activeColumn].cardOrder.indexOf(activeId);
+      const overIndex = columns[activeColumn].cardOrder.indexOf(overId);
+      
+      if (activeIndex !== overIndex) {
+        reorderCard(activeColumn, activeId, overIndex);
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-slate-100">
@@ -45,16 +87,33 @@ export default function TaskzenClient() {
           </div>
           
           {/* Columns Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {COLUMNS.map((column) => (
-              <Column
-                key={column.id}
-                columnId={column.id}
-                title={column.title}
-                searchQuery={searchQuery}
-              />
-            ))}
-          </div>
+          <DndContext
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {COLUMNS.map((column) => {
+                const columnCards = columns[column.id].cardOrder
+                  .map(cardId => cards[cardId])
+                  .filter(Boolean);
+                
+                return (
+                  <SortableContext
+                    key={column.id}
+                    id={column.id}
+                    items={columnCards.map(card => card.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    <Column
+                      columnId={column.id}
+                      title={column.title}
+                      searchQuery={searchQuery}
+                    />
+                  </SortableContext>
+                );
+              })}
+            </div>
+          </DndContext>
         </div>
       </div>
     </div>

@@ -1,6 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { useDroppable } from '@dnd-kit/core';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { useTaskzenStore } from '@/lib/taskzen/store';
 import { selectCardsInColumn, filterBoard } from '@/lib/taskzen/selectors';
 import { ColumnId } from '@/lib/taskzen/types';
@@ -13,28 +16,49 @@ interface ColumnProps {
   searchQuery: string;
 }
 
+// Draggable Card Component
+function DraggableCard({ card, columnId }: { card: any; columnId: ColumnId }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: card.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className="cursor-grab active:cursor-grabbing"
+    >
+      <CardItem card={card} columnId={columnId} />
+    </div>
+  );
+}
+
 export default function Column({ columnId, title, searchQuery }: ColumnProps) {
   const [showAddForm, setShowAddForm] = useState(false);
-  const { columns, cards, reorderCard } = useTaskzenStore();
+  const { columns, cards } = useTaskzenStore();
   
   // Apply search filter if there's a query
   const filteredBoard = searchQuery ? filterBoard({ columns, cards }, searchQuery) : { columns, cards };
   const filteredCards = selectCardsInColumn(filteredBoard, columnId);
 
-  const handleMoveUp = (cardId: string) => {
-    const currentIndex = columns[columnId].cardOrder.indexOf(cardId);
-    if (currentIndex > 0) {
-      reorderCard(columnId, cardId, currentIndex - 1);
-    }
-  };
+  // Make column droppable
+  const { setNodeRef: setDroppableRef } = useDroppable({
+    id: columnId,
+  });
 
-  const handleMoveDown = (cardId: string) => {
-    const currentIndex = columns[columnId].cardOrder.indexOf(cardId);
-    const originalCards = selectCardsInColumn({ columns, cards }, columnId);
-    if (currentIndex < originalCards.length - 1) {
-      reorderCard(columnId, cardId, currentIndex + 1);
-    }
-  };
 
   const handleAddCard = () => {
     if (showAddForm) return; // Prevent multiple clicks
@@ -49,8 +73,6 @@ export default function Column({ columnId, title, searchQuery }: ColumnProps) {
     setShowAddForm(false);
   };
 
-  const canMoveLeft = columnId !== 'todo';
-  const canMoveRight = columnId !== 'done' && columnId !== 'archive';
 
   const getColumnGradient = (columnId: ColumnId) => {
     switch (columnId) {
@@ -60,8 +82,6 @@ export default function Column({ columnId, title, searchQuery }: ColumnProps) {
         return 'from-blue-500/30 to-indigo-500/30 border-blue-400/50 bg-blue-500/5';
       case 'done':
         return 'from-emerald-500/30 to-green-500/30 border-emerald-400/50 bg-emerald-500/5';
-      case 'archive':
-        return 'from-slate-500/30 to-gray-600/30 border-slate-400/50 bg-slate-500/5';
       default:
         return 'from-slate-500/30 to-slate-600/30 border-slate-400/50 bg-slate-500/5';
     }
@@ -75,8 +95,6 @@ export default function Column({ columnId, title, searchQuery }: ColumnProps) {
         return '⚡';
       case 'done':
         return '✅';
-      case 'archive':
-        return '📦';
       default:
         return '📋';
     }
@@ -126,7 +144,7 @@ export default function Column({ columnId, title, searchQuery }: ColumnProps) {
       )}
       
       {/* Cards List */}
-      <div className="relative z-10 flex-1 space-y-4">
+      <div className="relative z-10 flex-1 space-y-4" ref={setDroppableRef}>
         {filteredCards.length === 0 ? (
           <div className="text-center py-12">
             {!showAddForm && (
@@ -146,17 +164,11 @@ export default function Column({ columnId, title, searchQuery }: ColumnProps) {
             )}
           </div>
         ) : (
-          filteredCards.map((card, index) => (
-            <CardItem
+          filteredCards.map((card) => (
+            <DraggableCard
               key={card.id}
               card={card}
               columnId={columnId}
-              canMoveLeft={canMoveLeft}
-              canMoveRight={canMoveRight}
-              canMoveUp={index > 0}
-              canMoveDown={index < filteredCards.length - 1}
-              onMoveUp={() => handleMoveUp(card.id)}
-              onMoveDown={() => handleMoveDown(card.id)}
             />
           ))
         )}

@@ -1,13 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { TaskzenStore, ColumnId, Board, Card, Tag, Profile } from './types';
+import { TaskzenStore, ColumnId, Board, Card } from './types';
 
-// Generate unique IDs
-const generateId = () => Math.random().toString(36).substr(2, 9);
-
-// Create slug from name
-const createSlug = (name: string) => 
-  name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const STORAGE_KEY = 'taskzen:v1';
 
 const initialBoard: Board = {
   columns: {
@@ -26,38 +21,8 @@ const initialBoard: Board = {
       title: 'Done',
       cardOrder: [],
     },
-    archive: {
-      id: 'archive',
-      title: 'Archive',
-      cardOrder: [],
-    },
   },
   cards: {},
-  tags: {},
-  profileName: 'default',
-};
-
-// Profile management
-const PROFILES_KEY = 'taskzen:profiles';
-
-const getProfiles = (): Profile[] => {
-  if (typeof window === 'undefined') return [];
-  const stored = localStorage.getItem(PROFILES_KEY);
-  return stored ? JSON.parse(stored) : [];
-};
-
-const saveProfiles = (profiles: Profile[]) => {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles));
-};
-
-const updateProfileAccess = (profileId: string) => {
-  const profiles = getProfiles();
-  const profile = profiles.find(p => p.id === profileId);
-  if (profile) {
-    profile.lastAccessed = Date.now();
-    saveProfiles(profiles);
-  }
 };
 
 export const useTaskzenStore = create<TaskzenStore>()(
@@ -65,54 +30,39 @@ export const useTaskzenStore = create<TaskzenStore>()(
     (set, get) => ({
       ...initialBoard,
 
-      // Card operations
-      addCard: (col: ColumnId, input: { title: string; description?: string; tags?: string[] }) => {
-        const id = generateId();
-        const now = Date.now();
-        
-        set((state) => {
-          const newCard: Card = {
-            id,
-            title: input.title,
-            description: input.description,
-            tags: input.tags || [],
-            archived: false,
-            createdAt: now,
-            updatedAt: now,
-          };
+      addCard: (col: ColumnId, input: { title: string; description?: string }) => {
+        const id = `card-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        const newCard: Card = {
+          id,
+          title: input.title,
+          description: input.description,
+        };
 
-          return {
-            cards: {
-              ...state.cards,
-              [id]: newCard,
+        set((state) => ({
+          cards: {
+            ...state.cards,
+            [id]: newCard,
+          },
+          columns: {
+            ...state.columns,
+            [col]: {
+              ...state.columns[col],
+              cardOrder: [...state.columns[col].cardOrder, id],
             },
-            columns: {
-              ...state.columns,
-              [col]: {
-                ...state.columns[col],
-                cardOrder: [...state.columns[col].cardOrder, id],
-              },
-            },
-          };
-        });
+          },
+        }));
       },
 
       editCard: (id: string, patch: Partial<Omit<Card, 'id'>>) => {
-        set((state) => {
-          const card = state.cards[id];
-          if (!card) return state;
-
-          return {
-            cards: {
-              ...state.cards,
-              [id]: {
-                ...card,
-                ...patch,
-                updatedAt: Date.now(),
-              },
+        set((state) => ({
+          cards: {
+            ...state.cards,
+            [id]: {
+              ...state.cards[id],
+              ...patch,
             },
-          };
-        });
+          },
+        }));
       },
 
       deleteCard: (id: string) => {
@@ -130,74 +80,6 @@ export const useTaskzenStore = create<TaskzenStore>()(
 
           return {
             cards: newCards,
-            columns: newColumns,
-          };
-        });
-      },
-
-      archiveCard: (id: string) => {
-        set((state) => {
-          const card = state.cards[id];
-          if (!card) return state;
-
-          // Remove from current column
-          const newColumns = { ...state.columns };
-          Object.keys(newColumns).forEach((colId) => {
-            if (newColumns[colId as ColumnId].cardOrder.includes(id)) {
-              newColumns[colId as ColumnId] = {
-                ...newColumns[colId as ColumnId],
-                cardOrder: newColumns[colId as ColumnId].cardOrder.filter((cardId) => cardId !== id),
-              };
-            }
-          });
-
-          // Add to archive
-          newColumns.archive = {
-            ...newColumns.archive,
-            cardOrder: [...newColumns.archive.cardOrder, id],
-          };
-
-          return {
-            cards: {
-              ...state.cards,
-              [id]: {
-                ...card,
-                archived: true,
-                updatedAt: Date.now(),
-              },
-            },
-            columns: newColumns,
-          };
-        });
-      },
-
-      restoreCard: (id: string) => {
-        set((state) => {
-          const card = state.cards[id];
-          if (!card) return state;
-
-          // Remove from archive
-          const newColumns = { ...state.columns };
-          newColumns.archive = {
-            ...newColumns.archive,
-            cardOrder: newColumns.archive.cardOrder.filter((cardId) => cardId !== id),
-          };
-
-          // Add to todo
-          newColumns.todo = {
-            ...newColumns.todo,
-            cardOrder: [...newColumns.todo.cardOrder, id],
-          };
-
-          return {
-            cards: {
-              ...state.cards,
-              [id]: {
-                ...card,
-                archived: false,
-                updatedAt: Date.now(),
-              },
-            },
             columns: newColumns,
           };
         });
@@ -255,162 +137,12 @@ export const useTaskzenStore = create<TaskzenStore>()(
         });
       },
 
-      // Tag operations
-      addTag: (tag: Omit<Tag, 'id'>) => {
-        const id = generateId();
-        const newTag: Tag = { ...tag, id };
-        
-        set((state) => ({
-          tags: {
-            ...state.tags,
-            [id]: newTag,
-          },
-        }));
-        
-        return id;
-      },
-
-      editTag: (id: string, patch: Partial<Omit<Tag, 'id'>>) => {
-        set((state) => {
-          const tag = state.tags[id];
-          if (!tag) return state;
-
-          return {
-            tags: {
-              ...state.tags,
-              [id]: {
-                ...tag,
-                ...patch,
-              },
-            },
-          };
-        });
-      },
-
-      deleteTag: (id: string) => {
-        set((state) => {
-          const newTags = { ...state.tags };
-          delete newTags[id];
-
-          // Remove tag from all cards
-          const newCards = { ...state.cards };
-          Object.keys(newCards).forEach((cardId) => {
-            newCards[cardId] = {
-              ...newCards[cardId],
-              tags: newCards[cardId].tags.filter((tagId) => tagId !== id),
-            };
-          });
-
-          return {
-            tags: newTags,
-            cards: newCards,
-          };
-        });
-      },
-
-      addCardTag: (cardId: string, tagId: string) => {
-        set((state) => {
-          const card = state.cards[cardId];
-          if (!card || card.tags.includes(tagId)) return state;
-
-          return {
-            cards: {
-              ...state.cards,
-              [cardId]: {
-                ...card,
-                tags: [...card.tags, tagId],
-                updatedAt: Date.now(),
-              },
-            },
-          };
-        });
-      },
-
-      removeCardTag: (cardId: string, tagId: string) => {
-        set((state) => {
-          const card = state.cards[cardId];
-          if (!card) return state;
-
-          return {
-            cards: {
-              ...state.cards,
-              [cardId]: {
-                ...card,
-                tags: card.tags.filter((id) => id !== tagId),
-                updatedAt: Date.now(),
-              },
-            },
-          };
-        });
-      },
-
-      // Profile operations
-      createProfile: (name: string) => {
-        const id = generateId();
-        const slug = createSlug(name);
-        const profile: Profile = {
-          id,
-          name,
-          slug,
-          lastAccessed: Date.now(),
-        };
-
-        const profiles = getProfiles();
-        profiles.push(profile);
-        saveProfiles(profiles);
-
-        return id;
-      },
-
-      switchProfile: (profileId: string) => {
-        const profiles = getProfiles();
-        const profile = profiles.find(p => p.id === profileId);
-        if (!profile) return;
-
-        updateProfileAccess(profileId);
-        
-        set((state) => ({
-          ...state,
-          profileName: profile.name,
-        }));
-      },
-
-      deleteProfile: (profileId: string) => {
-        const profiles = getProfiles();
-        const filteredProfiles = profiles.filter(p => p.id !== profileId);
-        saveProfiles(filteredProfiles);
-      },
-
-      renameProfile: (profileId: string, newName: string) => {
-        const profiles = getProfiles();
-        const profile = profiles.find(p => p.id === profileId);
-        if (!profile) return;
-
-        profile.name = newName;
-        profile.slug = createSlug(newName);
-        saveProfiles(profiles);
-
-        set((state) => ({
-          ...state,
-          profileName: newName,
-        }));
-      },
-
-      getProfiles: () => getProfiles(),
-
-      // Board operations
       clearAll: () => {
-        set(() => ({
-          ...initialBoard,
-          profileName: get().profileName,
-        }));
+        set(initialBoard);
       },
 
       importJSON: (data: Board) => {
-        set(() => ({
-          ...data,
-          profileName: get().profileName,
-        }));
+        set(data);
       },
 
       exportJSON: () => {
@@ -420,20 +152,28 @@ export const useTaskzenStore = create<TaskzenStore>()(
           board: {
             columns: state.columns,
             cards: state.cards,
-            tags: state.tags,
-            profileName: state.profileName,
           },
-        });
+        }, null, 2);
       },
     }),
     {
-      name: 'taskzen:v1',
-      partialize: (state) => ({
-        columns: state.columns,
-        cards: state.cards,
-        tags: state.tags,
-        profileName: state.profileName,
-      }),
+      name: STORAGE_KEY,
+      version: 1,
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          // Ensure all required columns exist
+          const requiredColumns: ColumnId[] = ['todo', 'doing', 'done'];
+          requiredColumns.forEach((colId) => {
+            if (!state.columns[colId]) {
+              state.columns[colId] = {
+                id: colId,
+                title: colId.charAt(0).toUpperCase() + colId.slice(1),
+                cardOrder: [],
+              };
+            }
+          });
+        }
+      },
     }
   )
 );

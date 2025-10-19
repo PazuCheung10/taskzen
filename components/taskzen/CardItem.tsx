@@ -7,23 +7,11 @@ import { Card, ColumnId } from '@/lib/taskzen/types';
 interface CardItemProps {
   card: Card;
   columnId: ColumnId;
-  canMoveLeft: boolean;
-  canMoveRight: boolean;
-  canMoveUp: boolean;
-  canMoveDown: boolean;
-  onMoveUp: () => void;
-  onMoveDown: () => void;
 }
 
 export default function CardItem({
   card,
   columnId,
-  canMoveLeft,
-  canMoveRight,
-  canMoveUp,
-  canMoveDown,
-  onMoveUp,
-  onMoveDown,
 }: CardItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(card.title);
@@ -34,7 +22,7 @@ export default function CardItem({
   const editFormRef = useRef<HTMLFormElement>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
   
-  const { editCard, deleteCard, moveCard } = useTaskzenStore();
+  const { editCard, deleteCard } = useTaskzenStore();
 
   // Focus title input when entering edit mode
   useEffect(() => {
@@ -86,43 +74,13 @@ export default function CardItem({
   const handleDelete = async () => {
     if (isProcessing) return;
     
-    if (confirm(`Are you sure you want to delete "${card.title}"? This action cannot be undone.`)) {
+    if (confirm(`Are you sure you want to delete "${card.title}"?`)) {
       setIsProcessing(true);
       try {
-        deleteCard(card.id);
+        await deleteCard(card.id);
       } finally {
         setIsProcessing(false);
       }
-    }
-  };
-
-  const handleMoveLeft = async () => {
-    if (isProcessing || !canMoveLeft) return;
-    
-    setIsProcessing(true);
-    try {
-      const columnOrder: ColumnId[] = ['todo', 'doing', 'done'];
-      const currentIndex = columnOrder.indexOf(columnId);
-      if (currentIndex > 0) {
-        moveCard(card.id, columnOrder[currentIndex - 1]);
-      }
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleMoveRight = async () => {
-    if (isProcessing || !canMoveRight) return;
-    
-    setIsProcessing(true);
-    try {
-      const columnOrder: ColumnId[] = ['todo', 'doing', 'done'];
-      const currentIndex = columnOrder.indexOf(columnId);
-      if (currentIndex < columnOrder.length - 1) {
-        moveCard(card.id, columnOrder[currentIndex + 1]);
-      }
-    } finally {
-      setIsProcessing(false);
     }
   };
 
@@ -205,65 +163,12 @@ export default function CardItem({
       <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-400/0 via-purple-400/0 to-pink-400/0 group-hover:from-cyan-400/5 group-hover:via-purple-400/5 group-hover:to-pink-400/5 transition-all duration-500 pointer-events-none"></div>
 
       {showActions && (
-        <div className="mt-4 space-y-3 animate-in slide-in-from-top-2 duration-200">
-          {/* Reorder controls */}
-          <div className="flex gap-2">
-            <button
-              onClick={onMoveUp}
-              disabled={!canMoveUp || isProcessing}
-              className="group relative overflow-hidden bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-400 hover:to-slate-500 disabled:from-slate-700 disabled:to-slate-800 disabled:cursor-not-allowed text-white text-xs font-semibold px-3 py-2 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-slate-400/50 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none"
-              title="Move up"
-              aria-label={`Move "${card.title}" up in ${columnId} column`}
-            >
-              <span className="relative z-10">↑</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            </button>
-            <button
-              onClick={onMoveDown}
-              disabled={!canMoveDown || isProcessing}
-              className="group relative overflow-hidden bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-400 hover:to-slate-500 disabled:from-slate-700 disabled:to-slate-800 disabled:cursor-not-allowed text-white text-xs font-semibold px-3 py-2 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-slate-400/50 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none"
-              title="Move down"
-              aria-label={`Move "${card.title}" down in ${columnId} column`}
-            >
-              <span className="relative z-10">↓</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            </button>
-          </div>
-
-          {/* Move between columns */}
-          <div className="flex gap-2">
-            <button
-              onClick={handleMoveLeft}
-              disabled={!canMoveLeft || isProcessing}
-              className="group relative overflow-hidden bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 disabled:from-slate-700 disabled:to-slate-800 disabled:cursor-not-allowed text-white text-xs font-semibold px-3 py-2 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400/50 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none"
-              title="Move left"
-              aria-label={`Move "${card.title}" to previous column`}
-            >
-              <span className="relative z-10 flex items-center gap-1">
-                {isProcessing ? '⏳' : '←'} {isProcessing ? '...' : 'Move'}
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            </button>
-            <button
-              onClick={handleMoveRight}
-              disabled={!canMoveRight || isProcessing}
-              className="group relative overflow-hidden bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 disabled:from-slate-700 disabled:to-slate-800 disabled:cursor-not-allowed text-white text-xs font-semibold px-3 py-2 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400/50 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none"
-              title="Move right"
-              aria-label={`Move "${card.title}" to next column`}
-            >
-              <span className="relative z-10 flex items-center gap-1">
-                {isProcessing ? '⏳' : 'Move'} {isProcessing ? '...' : '→'}
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            </button>
-          </div>
-
-          {/* Edit and Delete */}
+        <div className="mt-4 animate-in slide-in-from-top-2 duration-200">
           <div className="flex gap-2">
             <button
               onClick={handleEdit}
               disabled={isProcessing}
-              className="group relative overflow-hidden bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 disabled:from-slate-600 disabled:to-slate-700 disabled:cursor-not-allowed text-white text-xs font-semibold px-3 py-2 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none"
+              className="group relative overflow-hidden bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 disabled:from-slate-500 disabled:to-slate-600 disabled:cursor-not-allowed text-white text-xs font-semibold px-3 py-2 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none"
               title="Edit card"
               aria-label={`Edit "${card.title}"`}
             >
@@ -275,12 +180,12 @@ export default function CardItem({
             <button
               onClick={handleDelete}
               disabled={isProcessing}
-              className="group relative overflow-hidden bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 disabled:from-slate-600 disabled:to-slate-700 disabled:cursor-not-allowed text-white text-xs font-semibold px-3 py-2 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-400/50 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none"
+              className="group relative overflow-hidden bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 disabled:from-slate-500 disabled:to-slate-600 disabled:cursor-not-allowed text-white text-xs font-semibold px-3 py-2 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-400/50 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none"
               title="Delete card"
               aria-label={`Delete "${card.title}"`}
             >
               <span className="relative z-10 flex items-center gap-1">
-                {isProcessing ? '⏳' : '🗑️'} {isProcessing ? '...' : 'Delete'}
+                {isProcessing ? '⏳' : '🗑️'} {isProcessing ? 'Deleting...' : 'Delete'}
               </span>
               <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </button>
