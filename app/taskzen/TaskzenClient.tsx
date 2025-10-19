@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { DndContext, DragEndEvent, DragOverEvent, DragStartEvent, closestCenter } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, DragOverEvent, DragStartEvent, closestCenter, DragOverlay } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import Column from '@/components/taskzen/Column';
 import Toolbar from '@/components/taskzen/Toolbar';
-import { ColumnId } from '@/lib/taskzen/types';
+import { ColumnId, Card } from '@/lib/taskzen/types';
 import { useTaskzenStore } from '@/lib/taskzen/store';
 
 const COLUMNS: { id: ColumnId; title: string }[] = [
@@ -16,7 +16,17 @@ const COLUMNS: { id: ColumnId; title: string }[] = [
 
 export default function TaskzenClient() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeCard, setActiveCard] = useState<Card | null>(null);
   const { moveCard, reorderCard, columns, cards } = useTaskzenStore();
+
+  const handleDragStart = (event: DragStartEvent) => {
+    const { active } = event;
+    const activeId = active.id as string;
+    const card = cards[activeId];
+    if (card) {
+      setActiveCard(card);
+    }
+  };
 
   const handleDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
@@ -64,6 +74,9 @@ export default function TaskzenClient() {
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
+    
+    // Clear the active card
+    setActiveCard(null);
     
     if (!over) return;
 
@@ -142,6 +155,7 @@ export default function TaskzenClient() {
           {/* Columns Grid */}
           <DndContext
             collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
           >
@@ -162,12 +176,35 @@ export default function TaskzenClient() {
                       columnId={column.id}
                       title={column.title}
                       searchQuery={searchQuery}
+                      activeCardId={activeCard?.id}
                     />
                   </SortableContext>
                 );
               })}
-            </div>
-          </DndContext>
+              </div>
+            </DndContext>
+            
+            {/* Drag Overlay */}
+            <DragOverlay>
+              {activeCard ? (
+                <div className="backdrop-blur-sm bg-white/25 border-2 border-cyan-400/60 rounded-xl p-4 shadow-2xl transform rotate-2 scale-110 opacity-95">
+                  <div className="space-y-3">
+                    <h3 className="font-semibold text-slate-100 text-base leading-tight">
+                      {activeCard.title}
+                    </h3>
+                    {activeCard.description && (
+                      <p className="text-slate-300 text-sm leading-relaxed">
+                        {activeCard.description}
+                      </p>
+                    )}
+                  </div>
+                  {/* Drag indicator */}
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-xs">✋</span>
+                  </div>
+                </div>
+              ) : null}
+            </DragOverlay>
         </div>
       </div>
     </div>

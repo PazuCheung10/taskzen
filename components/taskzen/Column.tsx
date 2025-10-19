@@ -14,14 +14,17 @@ interface ColumnProps {
   columnId: ColumnId;
   title: string;
   searchQuery: string;
+  activeCardId?: string;
+  isDragOver?: boolean;
 }
 
 // Draggable Card Component
-function DraggableCard({ card, columnId, isEditing, onEditStateChange }: { 
+function DraggableCard({ card, columnId, isEditing, onEditStateChange, activeCardId }: { 
   card: any; 
   columnId: ColumnId; 
   isEditing: boolean;
   onEditStateChange: (cardId: string, isEditing: boolean) => void;
+  activeCardId?: string;
 }) {
   const [isHovered, setIsHovered] = useState(false);
   
@@ -40,7 +43,7 @@ function DraggableCard({ card, columnId, isEditing, onEditStateChange }: {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging || activeCardId === card.id ? 0.3 : 1,
   };
 
   return (
@@ -73,7 +76,7 @@ function DraggableCard({ card, columnId, isEditing, onEditStateChange }: {
   );
 }
 
-export default function Column({ columnId, title, searchQuery }: ColumnProps) {
+export default function Column({ columnId, title, searchQuery, activeCardId, isDragOver }: ColumnProps) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingCardId, setEditingCardId] = useState<string | null>(null);
   const { columns, cards } = useTaskzenStore();
@@ -137,7 +140,7 @@ export default function Column({ columnId, title, searchQuery }: ColumnProps) {
   };
 
   return (
-    <div className={`backdrop-blur-lg bg-gradient-to-b ${getColumnGradient(columnId)} border rounded-2xl p-6 min-h-[600px] flex flex-col shadow-2xl hover:shadow-3xl transition-all duration-300 relative overflow-hidden`}>
+    <div className={`backdrop-blur-lg bg-gradient-to-b ${getColumnGradient(columnId)} border rounded-2xl p-6 min-h-[600px] flex flex-col shadow-2xl hover:shadow-3xl transition-all duration-300 relative overflow-hidden ${isDragOver ? 'ring-2 ring-cyan-400/50 bg-cyan-500/10' : ''}`}>
       {/* Column Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="w-full h-full" style={{
@@ -207,6 +210,7 @@ export default function Column({ columnId, title, searchQuery }: ColumnProps) {
               columnId={columnId}
               isEditing={editingCardId === card.id}
               onEditStateChange={handleEditStateChange}
+              activeCardId={activeCardId}
             />
           ))
         )}
