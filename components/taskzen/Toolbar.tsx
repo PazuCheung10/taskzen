@@ -24,7 +24,11 @@ export default function Toolbar({ searchQuery, onSearchChange }: ToolbarProps) {
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      const isClickOnMenu = menuRef.current && menuRef.current.contains(target);
+      const isClickOnButton = buttonRef.current && buttonRef.current.contains(target);
+      
+      if (!isClickOnMenu && !isClickOnButton) {
         setIsMenuOpen(false);
       }
     };
