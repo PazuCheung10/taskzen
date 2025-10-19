@@ -16,7 +16,7 @@ export default function CardItem({
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(card.title);
   const [editDescription, setEditDescription] = useState(card.description || '');
-  const [showActions, setShowActions] = useState(false);
+  const [showEditButton, setShowEditButton] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   
   const editFormRef = useRef<HTMLFormElement>(null);
@@ -61,16 +61,6 @@ export default function CardItem({
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && e.ctrlKey) {
-      e.preventDefault();
-      handleSave();
-    } else if (e.key === 'Escape') {
-      e.preventDefault();
-      handleCancel();
-    }
-  };
-
   const handleDelete = async () => {
     if (isProcessing) return;
     
@@ -81,6 +71,16 @@ export default function CardItem({
       } finally {
         setIsProcessing(false);
       }
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && e.ctrlKey) {
+      e.preventDefault();
+      handleSave();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      handleCancel();
     }
   };
 
@@ -132,6 +132,18 @@ export default function CardItem({
               </span>
               <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </button>
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={isProcessing}
+              className="group relative overflow-hidden bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 disabled:from-slate-500 disabled:to-slate-600 disabled:cursor-not-allowed text-white text-sm font-semibold px-4 py-2 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-400/50 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none"
+              aria-label="Delete card"
+            >
+              <span className="relative z-10 flex items-center gap-2">
+                {isProcessing ? '⏳' : '🗑️'} {isProcessing ? 'Deleting...' : 'Delete'}
+              </span>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </button>
           </div>
           <p className="text-xs text-slate-300 mt-3 text-center">
             Ctrl+Enter to save, Esc to cancel
@@ -144,54 +156,41 @@ export default function CardItem({
   return (
     <div
       className="group relative backdrop-blur-sm bg-white/10 border border-white/20 rounded-xl p-4 hover:bg-white/15 hover:border-white/30 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-      onMouseEnter={() => setShowActions(true)}
-      onMouseLeave={() => setShowActions(false)}
+      onMouseEnter={() => setShowEditButton(true)}
+      onMouseLeave={() => setShowEditButton(false)}
     >
       {/* Card Content */}
-      <div className="space-y-3">
-        <h3 className="font-semibold text-slate-100 text-base leading-tight">
-          {card.title}
-        </h3>
-        {card.description && (
-          <p className="text-slate-300 text-sm leading-relaxed">
-            {card.description}
-          </p>
+      <div className="flex items-start justify-between">
+        <div className="flex-1 space-y-3 pr-2">
+          <h3 className="font-semibold text-slate-100 text-base leading-tight">
+            {card.title}
+          </h3>
+          {card.description && (
+            <p className="text-slate-300 text-sm leading-relaxed">
+              {card.description}
+            </p>
+          )}
+        </div>
+        
+        {/* Edit Button - positioned on the right */}
+        {showEditButton && (
+          <button
+            onClick={handleEdit}
+            disabled={isProcessing}
+            className="group relative overflow-hidden bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 disabled:from-slate-500 disabled:to-slate-600 disabled:cursor-not-allowed text-white text-xs font-semibold px-3 py-2 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none flex-shrink-0"
+            title="Edit card"
+            aria-label={`Edit "${card.title}"`}
+          >
+            <span className="relative z-10 flex items-center gap-1">
+              ✏️ Edit
+            </span>
+            <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          </button>
         )}
       </div>
 
       {/* Hover Glow Effect */}
       <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-400/0 via-purple-400/0 to-pink-400/0 group-hover:from-cyan-400/5 group-hover:via-purple-400/5 group-hover:to-pink-400/5 transition-all duration-500 pointer-events-none"></div>
-
-      {showActions && (
-        <div className="mt-4 animate-in slide-in-from-top-2 duration-200">
-          <div className="flex gap-2">
-            <button
-              onClick={handleEdit}
-              disabled={isProcessing}
-              className="group relative overflow-hidden bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 disabled:from-slate-500 disabled:to-slate-600 disabled:cursor-not-allowed text-white text-xs font-semibold px-3 py-2 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none"
-              title="Edit card"
-              aria-label={`Edit "${card.title}"`}
-            >
-              <span className="relative z-10 flex items-center gap-1">
-                ✏️ Edit
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            </button>
-            <button
-              onClick={handleDelete}
-              disabled={isProcessing}
-              className="group relative overflow-hidden bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 disabled:from-slate-500 disabled:to-slate-600 disabled:cursor-not-allowed text-white text-xs font-semibold px-3 py-2 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-400/50 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none"
-              title="Delete card"
-              aria-label={`Delete "${card.title}"`}
-            >
-              <span className="relative z-10 flex items-center gap-1">
-                {isProcessing ? '⏳' : '🗑️'} {isProcessing ? 'Deleting...' : 'Delete'}
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
