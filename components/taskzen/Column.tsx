@@ -126,7 +126,7 @@ export default function Column({ columnId, title, searchQuery }: ColumnProps) {
         {filteredCards.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-6xl mb-4 opacity-50">
-              {searchQuery ? '🔍' : showAddForm ? '📝' : getColumnIcon(columnId)}
+              {searchQuery ? '🔍' : getColumnIcon(columnId)}
             </div>
             {searchQuery && (
               <p className="text-slate-300 text-lg font-medium mb-2">
