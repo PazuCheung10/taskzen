@@ -128,9 +128,9 @@ export default function CardItem({
 
   if (isEditing) {
     return (
-      <div className="bg-slate-600 border border-slate-500 rounded-lg p-3">
+      <div className="backdrop-blur-sm bg-white/15 border border-white/30 rounded-xl p-4 shadow-xl">
         <form ref={editFormRef} onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
-          <div className="space-y-2">
+          <div className="space-y-3">
             <input
               ref={titleInputRef}
               type="text"
@@ -138,7 +138,7 @@ export default function CardItem({
               onChange={(e) => setEditTitle(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Card title..."
-              className="w-full px-2 py-1 bg-slate-700 border border-slate-500 rounded text-slate-100 text-sm focus:outline-none focus:ring-1 focus:ring-cyan-400"
+              className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 backdrop-blur-sm transition-all duration-300"
             />
             <textarea
               value={editDescription}
@@ -146,30 +146,36 @@ export default function CardItem({
               onKeyDown={handleKeyDown}
               placeholder="Description (optional)..."
               rows={2}
-              className="w-full px-2 py-1 bg-slate-700 border border-slate-500 rounded text-slate-100 text-sm focus:outline-none focus:ring-1 focus:ring-cyan-400 resize-none"
+              className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 backdrop-blur-sm resize-none transition-all duration-300"
             />
           </div>
-          <div className="flex gap-2 mt-3">
+          <div className="flex gap-3 mt-4">
             <button
               type="button"
               onClick={handleSave}
               disabled={!editTitle.trim() || isProcessing}
-              className="bg-green-600 hover:bg-green-700 disabled:bg-slate-500 disabled:cursor-not-allowed text-white text-xs px-2 py-1 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-green-400"
+              className="group relative overflow-hidden bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 disabled:from-slate-500 disabled:to-slate-600 disabled:cursor-not-allowed text-white text-sm font-semibold px-4 py-2 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none"
               aria-label="Save changes"
             >
-              {isProcessing ? 'Saving...' : 'Save'}
+              <span className="relative z-10 flex items-center gap-2">
+                {isProcessing ? '⏳' : '💾'} {isProcessing ? 'Saving...' : 'Save'}
+              </span>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </button>
             <button
               type="button"
               onClick={handleCancel}
               disabled={isProcessing}
-              className="bg-slate-500 hover:bg-slate-400 disabled:bg-slate-600 disabled:cursor-not-allowed text-white text-xs px-2 py-1 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400"
+              className="group relative overflow-hidden bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-400 hover:to-slate-500 disabled:from-slate-600 disabled:to-slate-700 disabled:cursor-not-allowed text-white text-sm font-semibold px-4 py-2 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-slate-400/50 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none"
               aria-label="Cancel editing"
             >
-              Cancel
+              <span className="relative z-10 flex items-center gap-2">
+                ✕ Cancel
+              </span>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </button>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-slate-300 mt-3 text-center">
             Ctrl+Enter to save, Esc to cancel
           </p>
         </form>
@@ -179,86 +185,104 @@ export default function CardItem({
 
   return (
     <div
-      className="bg-slate-600 border border-slate-500 rounded-lg p-3 hover:bg-slate-550 transition-colors"
+      className="group relative backdrop-blur-sm bg-white/10 border border-white/20 rounded-xl p-4 hover:bg-white/15 hover:border-white/30 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
       onMouseEnter={() => setShowActions(true)}
       onMouseLeave={() => setShowActions(false)}
     >
-      <div className="space-y-2">
-        <h3 className="font-medium text-slate-100 text-sm leading-tight">
+      {/* Card Content */}
+      <div className="space-y-3">
+        <h3 className="font-semibold text-slate-100 text-base leading-tight">
           {card.title}
         </h3>
         {card.description && (
-          <p className="text-slate-300 text-xs leading-relaxed">
+          <p className="text-slate-300 text-sm leading-relaxed">
             {card.description}
           </p>
         )}
       </div>
 
+      {/* Hover Glow Effect */}
+      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-400/0 via-purple-400/0 to-pink-400/0 group-hover:from-cyan-400/5 group-hover:via-purple-400/5 group-hover:to-pink-400/5 transition-all duration-500 pointer-events-none"></div>
+
       {showActions && (
-        <div className="mt-3 space-y-2">
+        <div className="mt-4 space-y-3 animate-in slide-in-from-top-2 duration-200">
           {/* Reorder controls */}
-          <div className="flex gap-1">
+          <div className="flex gap-2">
             <button
               onClick={onMoveUp}
               disabled={!canMoveUp || isProcessing}
-              className="bg-slate-500 hover:bg-slate-400 disabled:bg-slate-700 disabled:cursor-not-allowed text-white text-xs px-2 py-1 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400"
+              className="group relative overflow-hidden bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-400 hover:to-slate-500 disabled:from-slate-700 disabled:to-slate-800 disabled:cursor-not-allowed text-white text-xs font-semibold px-3 py-2 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-slate-400/50 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none"
               title="Move up"
               aria-label={`Move "${card.title}" up in ${columnId} column`}
             >
-              ↑
+              <span className="relative z-10">↑</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </button>
             <button
               onClick={onMoveDown}
               disabled={!canMoveDown || isProcessing}
-              className="bg-slate-500 hover:bg-slate-400 disabled:bg-slate-700 disabled:cursor-not-allowed text-white text-xs px-2 py-1 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400"
+              className="group relative overflow-hidden bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-400 hover:to-slate-500 disabled:from-slate-700 disabled:to-slate-800 disabled:cursor-not-allowed text-white text-xs font-semibold px-3 py-2 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-slate-400/50 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none"
               title="Move down"
               aria-label={`Move "${card.title}" down in ${columnId} column`}
             >
-              ↓
+              <span className="relative z-10">↓</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </button>
           </div>
 
           {/* Move between columns */}
-          <div className="flex gap-1">
+          <div className="flex gap-2">
             <button
               onClick={handleMoveLeft}
               disabled={!canMoveLeft || isProcessing}
-              className="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:cursor-not-allowed text-white text-xs px-2 py-1 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="group relative overflow-hidden bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 disabled:from-slate-700 disabled:to-slate-800 disabled:cursor-not-allowed text-white text-xs font-semibold px-3 py-2 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400/50 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none"
               title="Move left"
               aria-label={`Move "${card.title}" to previous column`}
             >
-              {isProcessing ? '...' : '← Move'}
+              <span className="relative z-10 flex items-center gap-1">
+                {isProcessing ? '⏳' : '←'} {isProcessing ? '...' : 'Move'}
+              </span>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </button>
             <button
               onClick={handleMoveRight}
               disabled={!canMoveRight || isProcessing}
-              className="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:cursor-not-allowed text-white text-xs px-2 py-1 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="group relative overflow-hidden bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 disabled:from-slate-700 disabled:to-slate-800 disabled:cursor-not-allowed text-white text-xs font-semibold px-3 py-2 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400/50 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none"
               title="Move right"
               aria-label={`Move "${card.title}" to next column`}
             >
-              {isProcessing ? '...' : 'Move →'}
+              <span className="relative z-10 flex items-center gap-1">
+                {isProcessing ? '⏳' : 'Move'} {isProcessing ? '...' : '→'}
+              </span>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </button>
           </div>
 
           {/* Edit and Delete */}
-          <div className="flex gap-1">
+          <div className="flex gap-2">
             <button
               onClick={handleEdit}
               disabled={isProcessing}
-              className="bg-yellow-600 hover:bg-yellow-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white text-xs px-2 py-1 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className="group relative overflow-hidden bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 disabled:from-slate-600 disabled:to-slate-700 disabled:cursor-not-allowed text-white text-xs font-semibold px-3 py-2 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none"
               title="Edit card"
               aria-label={`Edit "${card.title}"`}
             >
-              Edit
+              <span className="relative z-10 flex items-center gap-1">
+                ✏️ Edit
+              </span>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </button>
             <button
               onClick={handleDelete}
               disabled={isProcessing}
-              className="bg-red-600 hover:bg-red-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white text-xs px-2 py-1 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-red-400"
+              className="group relative overflow-hidden bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 disabled:from-slate-600 disabled:to-slate-700 disabled:cursor-not-allowed text-white text-xs font-semibold px-3 py-2 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-400/50 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none"
               title="Delete card"
               aria-label={`Delete "${card.title}"`}
             >
-              {isProcessing ? '...' : 'Delete'}
+              <span className="relative z-10 flex items-center gap-1">
+                {isProcessing ? '⏳' : '🗑️'} {isProcessing ? '...' : 'Delete'}
+              </span>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </button>
           </div>
         </div>

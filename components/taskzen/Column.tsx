@@ -52,19 +52,56 @@ export default function Column({ columnId, title, searchQuery }: ColumnProps) {
   const canMoveLeft = columnId !== 'todo';
   const canMoveRight = columnId !== 'done';
 
+  const getColumnGradient = (columnId: ColumnId) => {
+    switch (columnId) {
+      case 'todo':
+        return 'from-orange-500/20 to-red-500/20 border-orange-400/30';
+      case 'doing':
+        return 'from-blue-500/20 to-indigo-500/20 border-blue-400/30';
+      case 'done':
+        return 'from-emerald-500/20 to-green-500/20 border-emerald-400/30';
+      default:
+        return 'from-slate-500/20 to-slate-600/20 border-slate-400/30';
+    }
+  };
+
+  const getColumnIcon = (columnId: ColumnId) => {
+    switch (columnId) {
+      case 'todo':
+        return '📝';
+      case 'doing':
+        return '⚡';
+      case 'done':
+        return '✅';
+      default:
+        return '📋';
+    }
+  };
+
   return (
-    <div className="bg-slate-700 rounded-lg p-4 min-h-[500px] flex flex-col">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-medium text-slate-100">
-          {title} ({cards.length})
-        </h2>
+    <div className={`backdrop-blur-lg bg-gradient-to-b ${getColumnGradient(columnId)} border rounded-2xl p-6 min-h-[600px] flex flex-col shadow-2xl hover:shadow-3xl transition-all duration-300`}>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="text-2xl">{getColumnIcon(columnId)}</div>
+          <div>
+            <h2 className="text-2xl font-bold text-slate-100">
+              {title}
+            </h2>
+            <p className="text-sm text-slate-300 font-medium">
+              {cards.length} {cards.length === 1 ? 'task' : 'tasks'}
+            </p>
+          </div>
+        </div>
         <button
           onClick={handleAddCard}
           disabled={showAddForm}
-          className="bg-cyan-600 hover:bg-cyan-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white text-sm px-3 py-1 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400"
+          className="group relative overflow-hidden bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 disabled:from-slate-500 disabled:to-slate-600 disabled:cursor-not-allowed text-white font-semibold py-2.5 px-4 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:transform-none"
           aria-label={`Add new card to ${title} column`}
         >
-          {showAddForm ? 'Adding...' : '+ Add Card'}
+          <span className="relative z-10 flex items-center gap-2">
+            {showAddForm ? '⏳' : '✨'} {showAddForm ? 'Adding...' : 'Add Card'}
+          </span>
+          <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         </button>
       </div>
       
@@ -80,15 +117,25 @@ export default function Column({ columnId, title, searchQuery }: ColumnProps) {
       )}
       
       {/* Cards List */}
-      <div className="flex-1 space-y-3">
+      <div className="flex-1 space-y-4">
         {cards.length === 0 ? (
-          <div className="text-sm text-slate-400 text-center py-8">
-            {searchQuery ? (
-              `No cards match "${searchQuery}"`
-            ) : showAddForm ? (
-              'Fill out the form above to add your first card'
-            ) : (
-              'No cards yet'
+          <div className="text-center py-12">
+            <div className="text-6xl mb-4 opacity-50">
+              {searchQuery ? '🔍' : showAddForm ? '📝' : getColumnIcon(columnId)}
+            </div>
+            <p className="text-slate-300 text-lg font-medium mb-2">
+              {searchQuery ? (
+                `No tasks match "${searchQuery}"`
+              ) : showAddForm ? (
+                'Fill out the form above to add your first task'
+              ) : (
+                'No tasks yet'
+              )}
+            </p>
+            {!searchQuery && !showAddForm && (
+              <p className="text-slate-400 text-sm">
+                Click "Add Card" to get started
+              </p>
             )}
           </div>
         ) : (

@@ -58,9 +58,9 @@ export default function NewCardForm({ columnId, onSuccess, onCancel }: NewCardFo
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label htmlFor={`title-${columnId}`} className="block text-sm font-medium text-slate-200 mb-1">
+        <label htmlFor={`title-${columnId}`} className="block text-sm font-semibold text-slate-200 mb-2">
           Title *
         </label>
         <input
@@ -71,13 +71,13 @@ export default function NewCardForm({ columnId, onSuccess, onCancel }: NewCardFo
           onKeyDown={handleKeyDown}
           placeholder="Enter card title..."
           required
-          className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-md text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+          className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-slate-100 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 backdrop-blur-sm transition-all duration-300"
           disabled={isSubmitting}
         />
       </div>
       
       <div>
-        <label htmlFor={`description-${columnId}`} className="block text-sm font-medium text-slate-200 mb-1">
+        <label htmlFor={`description-${columnId}`} className="block text-sm font-semibold text-slate-200 mb-2">
           Description
         </label>
         <textarea
@@ -87,31 +87,37 @@ export default function NewCardForm({ columnId, onSuccess, onCancel }: NewCardFo
           onKeyDown={handleKeyDown}
           placeholder="Enter description (optional)..."
           rows={2}
-          className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-md text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent resize-none"
+          className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-slate-100 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 backdrop-blur-sm resize-none transition-all duration-300"
           disabled={isSubmitting}
         />
       </div>
       
-      <div className="flex gap-2">
+      <div className="flex gap-3">
         <button
           type="submit"
           disabled={!title.trim() || isSubmitting}
-          className="flex-1 bg-cyan-600 hover:bg-cyan-700 disabled:bg-slate-500 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400"
+          className="group relative overflow-hidden flex-1 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 disabled:from-slate-500 disabled:to-slate-600 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:transform-none"
           aria-label="Add new card to this column"
         >
-          {isSubmitting ? 'Adding...' : 'Add Card'}
+          <span className="relative z-10 flex items-center justify-center gap-2">
+            {isSubmitting ? '⏳' : '✨'} {isSubmitting ? 'Adding...' : 'Add Card'}
+          </span>
+          <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         </button>
         <button
           type="button"
           onClick={handleCancel}
-          className="bg-slate-500 hover:bg-slate-400 text-white font-medium py-2 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400"
+          className="group relative overflow-hidden bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-400 hover:to-slate-500 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-slate-400/50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
           aria-label="Cancel adding new card"
         >
-          Cancel
+          <span className="relative z-10 flex items-center gap-2">
+            ✕ Cancel
+          </span>
+          <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         </button>
       </div>
       
-      <p className="text-xs text-slate-400 text-center">
+      <p className="text-xs text-slate-300 text-center">
         Press Ctrl+Enter to submit, Esc to cancel
       </p>
     </form>
