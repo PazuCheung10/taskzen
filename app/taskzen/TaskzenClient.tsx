@@ -17,6 +17,10 @@ const COLUMNS: { id: ColumnId; title: string }[] = [
 export default function TaskzenClient() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCard, setActiveCard] = useState<Card | null>(null);
+  const [dragOverInfo, setDragOverInfo] = useState<{
+    columnId: ColumnId;
+    position: number;
+  } | null>(null);
   const { moveCard, reorderCard, columns, cards } = useTaskzenStore();
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -31,7 +35,10 @@ export default function TaskzenClient() {
   const handleDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
     
-    if (!over) return;
+    if (!over) {
+      setDragOverInfo(null);
+      return;
+    }
 
     const activeId = active.id as string;
     const overId = over.id as string;
@@ -47,6 +54,17 @@ export default function TaskzenClient() {
 
     if (!activeColumn) return;
 
+    // If hovering over a column (not a card)
+    if (COLUMNS.some(col => col.id === overId)) {
+      const targetColumn = overId as ColumnId;
+      const columnCards = columns[targetColumn].cardOrder.map(cardId => cards[cardId]).filter(Boolean);
+      setDragOverInfo({
+        columnId: targetColumn,
+        position: columnCards.length
+      });
+      return;
+    }
+
     // If hovering over another card
     if (activeId !== overId) {
       // Find which column the over card is in
@@ -60,10 +78,16 @@ export default function TaskzenClient() {
 
       if (!overColumn) return;
 
+      // Calculate drop position
+      const overIndex = columns[overColumn].cardOrder.indexOf(overId);
+      setDragOverInfo({
+        columnId: overColumn,
+        position: overIndex
+      });
+
       // If reordering within same column
       if (activeColumn === overColumn) {
         const activeIndex = columns[activeColumn].cardOrder.indexOf(activeId);
-        const overIndex = columns[overColumn].cardOrder.indexOf(overId);
         
         if (activeIndex !== overIndex) {
           reorderCard(activeColumn, activeId, overIndex);
@@ -75,8 +99,9 @@ export default function TaskzenClient() {
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     
-    // Clear the active card
+    // Clear the active card and drag over info
     setActiveCard(null);
+    setDragOverInfo(null);
     
     if (!over) return;
 
@@ -177,6 +202,7 @@ export default function TaskzenClient() {
                       title={column.title}
                       searchQuery={searchQuery}
                       activeCardId={activeCard?.id}
+                      dragOverInfo={dragOverInfo}
                     />
                   </SortableContext>
                 );

@@ -6,7 +6,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useTaskzenStore } from '@/lib/taskzen/store';
 import { selectCardsInColumn, filterBoard } from '@/lib/taskzen/selectors';
-import { ColumnId } from '@/lib/taskzen/types';
+import { ColumnId, Card } from '@/lib/taskzen/types';
 import NewCardForm from './NewCardForm';
 import CardItem from './CardItem';
 
@@ -15,7 +15,10 @@ interface ColumnProps {
   title: string;
   searchQuery: string;
   activeCardId?: string;
-  isDragOver?: boolean;
+  dragOverInfo?: {
+    columnId: ColumnId;
+    position: number;
+  } | null;
 }
 
 // Draggable Card Component
@@ -76,7 +79,7 @@ function DraggableCard({ card, columnId, isEditing, onEditStateChange, activeCar
   );
 }
 
-export default function Column({ columnId, title, searchQuery, activeCardId, isDragOver }: ColumnProps) {
+export default function Column({ columnId, title, searchQuery, activeCardId, dragOverInfo }: ColumnProps) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingCardId, setEditingCardId] = useState<string | null>(null);
   const { columns, cards } = useTaskzenStore();
@@ -112,6 +115,20 @@ export default function Column({ columnId, title, searchQuery, activeCardId, isD
     }
   };
 
+  // Check if this column should show a placeholder
+  const shouldShowPlaceholder = dragOverInfo?.columnId === columnId;
+  const placeholderPosition = dragOverInfo?.position || 0;
+
+  // Placeholder Component
+  const PlaceholderCard = () => (
+    <div className="backdrop-blur-sm bg-gradient-to-r from-cyan-400/20 to-blue-500/20 border-2 border-dashed border-cyan-400/60 rounded-xl p-4 shadow-lg animate-pulse">
+      <div className="space-y-3">
+        <div className="h-4 bg-gradient-to-r from-cyan-400/40 to-blue-500/40 rounded w-3/4"></div>
+        <div className="h-3 bg-gradient-to-r from-cyan-400/30 to-blue-500/30 rounded w-1/2"></div>
+      </div>
+      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-400/10 via-blue-500/10 to-purple-500/10"></div>
+    </div>
+  );
 
   const getColumnGradient = (columnId: ColumnId) => {
     switch (columnId) {
@@ -140,7 +157,7 @@ export default function Column({ columnId, title, searchQuery, activeCardId, isD
   };
 
   return (
-    <div className={`backdrop-blur-lg bg-gradient-to-b ${getColumnGradient(columnId)} border rounded-2xl p-6 min-h-[600px] flex flex-col shadow-2xl hover:shadow-3xl transition-all duration-300 relative overflow-hidden ${isDragOver ? 'ring-2 ring-cyan-400/50 bg-cyan-500/10' : ''}`}>
+    <div className={`backdrop-blur-lg bg-gradient-to-b ${getColumnGradient(columnId)} border rounded-2xl p-6 min-h-[600px] flex flex-col shadow-2xl hover:shadow-3xl transition-all duration-300 relative overflow-hidden`}>
       {/* Column Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="w-full h-full" style={{
@@ -203,16 +220,33 @@ export default function Column({ columnId, title, searchQuery, activeCardId, isD
             )}
           </div>
         ) : (
-          filteredCards.map((card) => (
-            <DraggableCard
-              key={card.id}
-              card={card}
-              columnId={columnId}
-              isEditing={editingCardId === card.id}
-              onEditStateChange={handleEditStateChange}
-              activeCardId={activeCardId}
-            />
-          ))
+          (() => {
+            const cardsWithPlaceholder: (Card | null)[] = [...filteredCards];
+            
+            // Insert placeholder at the correct position if this column should show it
+            if (shouldShowPlaceholder && activeCardId) {
+              cardsWithPlaceholder.splice(placeholderPosition, 0, null);
+            }
+            
+            return cardsWithPlaceholder.map((card, index) => {
+              // Render placeholder
+              if (card === null) {
+                return <PlaceholderCard key="placeholder" />;
+              }
+              
+              // Render actual card
+              return (
+                <DraggableCard
+                  key={card.id}
+                  card={card}
+                  columnId={columnId}
+                  isEditing={editingCardId === card.id}
+                  onEditStateChange={handleEditStateChange}
+                  activeCardId={activeCardId}
+                />
+              );
+            });
+          })()
         )}
       </div>
     </div>
