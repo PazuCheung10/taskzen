@@ -55,13 +55,13 @@ export default function Column({ columnId, title, searchQuery }: ColumnProps) {
   const getColumnGradient = (columnId: ColumnId) => {
     switch (columnId) {
       case 'todo':
-        return 'from-orange-500/20 to-red-500/20 border-orange-400/30';
+        return 'from-orange-500/30 to-red-500/30 border-orange-400/50 bg-orange-500/5';
       case 'doing':
-        return 'from-blue-500/20 to-indigo-500/20 border-blue-400/30';
+        return 'from-blue-500/30 to-indigo-500/30 border-blue-400/50 bg-blue-500/5';
       case 'done':
-        return 'from-emerald-500/20 to-green-500/20 border-emerald-400/30';
+        return 'from-emerald-500/30 to-green-500/30 border-emerald-400/50 bg-emerald-500/5';
       default:
-        return 'from-slate-500/20 to-slate-600/20 border-slate-400/30';
+        return 'from-slate-500/30 to-slate-600/30 border-slate-400/50 bg-slate-500/5';
     }
   };
 
@@ -79,8 +79,14 @@ export default function Column({ columnId, title, searchQuery }: ColumnProps) {
   };
 
   return (
-    <div className={`backdrop-blur-lg bg-gradient-to-b ${getColumnGradient(columnId)} border rounded-2xl p-6 min-h-[600px] flex flex-col shadow-2xl hover:shadow-3xl transition-all duration-300`}>
-      <div className="flex items-center justify-between mb-6">
+    <div className={`backdrop-blur-lg bg-gradient-to-b ${getColumnGradient(columnId)} border rounded-2xl p-6 min-h-[600px] flex flex-col shadow-2xl hover:shadow-3xl transition-all duration-300 relative overflow-hidden`}>
+      {/* Column Background Pattern */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="w-full h-full" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='20' cy='20' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }}></div>
+      </div>
+      <div className="relative z-10 flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="text-2xl">{getColumnIcon(columnId)}</div>
           <div>
@@ -107,7 +113,7 @@ export default function Column({ columnId, title, searchQuery }: ColumnProps) {
       
       {/* New Card Form - Only show when toggled */}
       {showAddForm && (
-        <div className="mb-4">
+        <div className="relative z-10 mb-4">
           <NewCardForm 
             columnId={columnId} 
             onSuccess={handleFormSubmit}
@@ -117,7 +123,7 @@ export default function Column({ columnId, title, searchQuery }: ColumnProps) {
       )}
       
       {/* Cards List */}
-      <div className="flex-1 space-y-4">
+      <div className="relative z-10 flex-1 space-y-4">
         {cards.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-6xl mb-4 opacity-50">

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useTaskzenStore } from '@/lib/taskzen/store';
 import { Board } from '@/lib/taskzen/types';
 
@@ -12,30 +12,39 @@ interface ToolbarProps {
 export default function Toolbar({ searchQuery, onSearchChange }: ToolbarProps) {
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   
   const { clearAll, importJSON, exportJSON } = useTaskzenStore();
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
 
   const handleExport = async () => {
     if (isExporting) return;
     
     setIsExporting(true);
+    setIsMenuOpen(false); // Close menu after action
     try {
       const jsonData = exportJSON();
       await navigator.clipboard.writeText(jsonData);
-      
-      // Show success feedback
-      const button = document.querySelector('[aria-label="Export board to clipboard"]') as HTMLButtonElement;
-      const originalText = button.textContent;
-      button.textContent = '✓ Copied!';
-      button.classList.add('bg-green-600', 'hover:bg-green-700');
-      button.classList.remove('bg-green-600', 'hover:bg-green-700');
-      
-      setTimeout(() => {
-        button.textContent = originalText;
-        button.classList.remove('bg-green-600', 'hover:bg-green-700');
-        button.classList.add('bg-green-600', 'hover:bg-green-700');
-      }, 2000);
+      alert('Board exported to clipboard! You can now paste it elsewhere.');
     } catch (error) {
       console.error('Failed to copy to clipboard:', error);
       alert('Failed to copy to clipboard. Please try again.');
@@ -46,6 +55,7 @@ export default function Toolbar({ searchQuery, onSearchChange }: ToolbarProps) {
 
   const handleImport = () => {
     if (isImporting) return;
+    setIsMenuOpen(false); // Close menu after action
     fileInputRef.current?.click();
   };
 
@@ -84,19 +94,7 @@ export default function Toolbar({ searchQuery, onSearchChange }: ToolbarProps) {
       
       // Import the validated data
       importJSON(data.board);
-      
-      // Show success feedback
-      const button = document.querySelector('[aria-label="Import board from JSON file"]') as HTMLButtonElement;
-      const originalText = button.textContent;
-      button.textContent = '✓ Imported!';
-      button.classList.add('bg-green-600', 'hover:bg-green-700');
-      button.classList.remove('bg-blue-600', 'hover:bg-blue-700');
-      
-      setTimeout(() => {
-        button.textContent = originalText;
-        button.classList.remove('bg-green-600', 'hover:bg-green-700');
-        button.classList.add('bg-blue-600', 'hover:bg-blue-700');
-      }, 2000);
+      alert('Board imported successfully!');
       
     } catch (error) {
       console.error('Import failed:', error);
@@ -113,19 +111,8 @@ export default function Toolbar({ searchQuery, onSearchChange }: ToolbarProps) {
   const handleClearAll = () => {
     if (confirm('Are you sure you want to clear all cards? This action cannot be undone.')) {
       clearAll();
-      
-      // Show success feedback
-      const button = document.querySelector('[aria-label="Clear all cards from board"]') as HTMLButtonElement;
-      const originalText = button.textContent;
-      button.textContent = '✓ Cleared!';
-      button.classList.add('bg-green-600', 'hover:bg-green-700');
-      button.classList.remove('bg-red-600', 'hover:bg-red-700');
-      
-      setTimeout(() => {
-        button.textContent = originalText;
-        button.classList.remove('bg-green-600', 'hover:bg-green-700');
-        button.classList.add('bg-red-600', 'hover:bg-red-700');
-      }, 2000);
+      setIsMenuOpen(false); // Close menu after action
+      alert('All cards have been cleared.');
     }
   };
 
@@ -169,42 +156,57 @@ export default function Toolbar({ searchQuery, onSearchChange }: ToolbarProps) {
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-wrap gap-3">
+        {/* Action Menu */}
+        <div className="relative" ref={menuRef}>
           <button
-            onClick={handleExport}
-            disabled={isExporting}
-            className="group relative overflow-hidden bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 disabled:from-slate-500 disabled:to-slate-600 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-            aria-label="Export board to clipboard"
+            onClick={toggleMenu}
+            className="group relative overflow-hidden bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-slate-400/50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            aria-label="Open actions menu"
           >
             <span className="relative z-10 flex items-center gap-2">
-              {isExporting ? '⏳' : '📋'} {isExporting ? 'Exporting...' : 'Export'}
+              ⚙️ Actions
             </span>
             <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </button>
 
-          <button
-            onClick={handleImport}
-            disabled={isImporting}
-            className="group relative overflow-hidden bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 disabled:from-slate-500 disabled:to-slate-600 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400/50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-            aria-label="Import board from JSON file"
-          >
-            <span className="relative z-10 flex items-center gap-2">
-              {isImporting ? '⏳' : '📁'} {isImporting ? 'Importing...' : 'Import'}
-            </span>
-            <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          </button>
+          {/* Dropdown Menu */}
+          {isMenuOpen && (
+            <div className="absolute right-0 top-full mt-2 w-48 backdrop-blur-lg bg-white/10 border border-white/20 rounded-xl shadow-2xl z-50 animate-in slide-in-from-top-2 duration-200">
+              <div className="p-2 space-y-1">
+                <button
+                  onClick={handleExport}
+                  disabled={isExporting}
+                  className="w-full group relative overflow-hidden bg-gradient-to-r from-emerald-500/20 to-teal-600/20 hover:from-emerald-500/30 hover:to-teal-600/30 disabled:from-slate-500/20 disabled:to-slate-600/20 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-400/50"
+                  aria-label="Export board to clipboard"
+                >
+                  <span className="relative z-10 flex items-center gap-3">
+                    {isExporting ? '⏳' : '📋'} {isExporting ? 'Exporting...' : 'Export Board'}
+                  </span>
+                </button>
 
-          <button
-            onClick={handleClearAll}
-            className="group relative overflow-hidden bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-400/50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-            aria-label="Clear all cards from board"
-          >
-            <span className="relative z-10 flex items-center gap-2">
-              🗑️ Clear All
-            </span>
-            <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          </button>
+                <button
+                  onClick={handleImport}
+                  disabled={isImporting}
+                  className="w-full group relative overflow-hidden bg-gradient-to-r from-blue-500/20 to-indigo-600/20 hover:from-blue-500/30 hover:to-indigo-600/30 disabled:from-slate-500/20 disabled:to-slate-600/20 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400/50"
+                  aria-label="Import board from JSON file"
+                >
+                  <span className="relative z-10 flex items-center gap-3">
+                    {isImporting ? '⏳' : '📁'} {isImporting ? 'Importing...' : 'Import Board'}
+                  </span>
+                </button>
+
+                <button
+                  onClick={handleClearAll}
+                  className="w-full group relative overflow-hidden bg-gradient-to-r from-red-500/20 to-pink-600/20 hover:from-red-500/30 hover:to-pink-600/30 text-white font-medium py-3 px-4 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-400/50"
+                  aria-label="Clear all cards from board"
+                >
+                  <span className="relative z-10 flex items-center gap-3">
+                    🗑️ Clear All
+                  </span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
