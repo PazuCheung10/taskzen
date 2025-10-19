@@ -125,9 +125,11 @@ export default function Column({ columnId, title, searchQuery }: ColumnProps) {
       <div className="relative z-10 flex-1 space-y-4">
         {filteredCards.length === 0 ? (
           <div className="text-center py-12">
-            <div className="text-6xl mb-4 opacity-50">
-              {searchQuery ? '🔍' : getColumnIcon(columnId)}
-            </div>
+            {!showAddForm && (
+              <div className="text-6xl mb-4 opacity-50">
+                {searchQuery ? '🔍' : getColumnIcon(columnId)}
+              </div>
+            )}
             {searchQuery && (
               <p className="text-slate-300 text-lg font-medium mb-2">
                 No tasks match "{searchQuery}"
