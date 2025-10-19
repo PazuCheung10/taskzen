@@ -126,7 +126,7 @@ export default function Toolbar({ searchQuery, onSearchChange }: ToolbarProps) {
     <div className="backdrop-blur-lg bg-white/10 border border-white/20 rounded-2xl p-6 shadow-2xl">
       <div className="flex flex-col sm:flex-row gap-6 items-center">
         {/* Search Input */}
-        <div className={`relative transition-all duration-500 ${isMenuOpen ? 'flex-1' : 'flex-1'}`}>
+        <div className="flex-1">
           <label htmlFor="search-input" className="sr-only">
             Search cards
           </label>
@@ -156,66 +156,52 @@ export default function Toolbar({ searchQuery, onSearchChange }: ToolbarProps) {
           </div>
         </div>
 
-        {/* Action Menu */}
-        <div className={`relative transition-all duration-500 ${isMenuOpen ? 'flex-1' : 'w-auto'}`} ref={menuRef}>
-          {!isMenuOpen ? (
-            <button
-              onClick={toggleMenu}
-              className="group relative overflow-hidden bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-white font-semibold py-4 px-4 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-slate-400/50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-              aria-label="Open actions menu"
-            >
-              <span className="relative z-10 flex items-center justify-center gap-2">
-                ⚙️ Actions
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            </button>
-          ) : (
-            <div className="flex gap-2 w-full">
-            <button
-              onClick={handleExport}
-              disabled={isExporting}
-              className="flex-1 group relative overflow-hidden bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 disabled:from-slate-500 disabled:to-slate-600 disabled:cursor-not-allowed text-white font-semibold py-4 px-4 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-              aria-label="Export board to clipboard"
-            >
-              <span className="relative z-10 flex items-center justify-center gap-2">
-                {isExporting ? '⏳' : '📋'} {isExporting ? 'Exporting...' : 'Export'}
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            </button>
+        {/* Action Menu Dropdown */}
+        <div className="relative" ref={menuRef}>
+          <button
+            onClick={toggleMenu}
+            className="group relative overflow-hidden bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-white font-semibold py-4 px-4 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-slate-400/50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            aria-label="Open actions menu"
+          >
+            <span className="relative z-10 flex items-center justify-center gap-2">
+              ⚙️ Actions
+            </span>
+            <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          </button>
 
-            <button
-              onClick={handleImport}
-              disabled={isImporting}
-              className="flex-1 group relative overflow-hidden bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 disabled:from-slate-500 disabled:to-slate-600 disabled:cursor-not-allowed text-white font-semibold py-4 px-4 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400/50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-              aria-label="Import board from JSON file"
-            >
-              <span className="relative z-10 flex items-center justify-center gap-2">
-                {isImporting ? '⏳' : '📁'} {isImporting ? 'Importing...' : 'Import'}
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            </button>
+          {/* Dropdown Menu */}
+          {isMenuOpen && (
+            <div className="absolute right-0 top-full mt-2 w-48 bg-white/95 backdrop-blur-lg border border-white/20 rounded-xl shadow-2xl z-50 overflow-hidden">
+              <div className="py-2">
+                <button
+                  onClick={handleExport}
+                  disabled={isExporting}
+                  className="w-full px-4 py-3 text-left text-slate-700 hover:bg-slate-100 disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed transition-colors duration-200 flex items-center gap-3"
+                  aria-label="Export board to clipboard"
+                >
+                  <span className="text-lg">{isExporting ? '⏳' : '📋'}</span>
+                  <span>{isExporting ? 'Exporting...' : 'Export'}</span>
+                </button>
 
-            <button
-              onClick={handleClearAll}
-              className="flex-1 group relative overflow-hidden bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white font-semibold py-4 px-4 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-400/50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-              aria-label="Clear all cards from board"
-            >
-              <span className="relative z-10 flex items-center justify-center gap-2">
-                🗑️ Clear
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            </button>
+                <button
+                  onClick={handleImport}
+                  disabled={isImporting}
+                  className="w-full px-4 py-3 text-left text-slate-700 hover:bg-slate-100 disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed transition-colors duration-200 flex items-center gap-3"
+                  aria-label="Import board from JSON file"
+                >
+                  <span className="text-lg">{isImporting ? '⏳' : '📁'}</span>
+                  <span>{isImporting ? 'Importing...' : 'Import'}</span>
+                </button>
 
-            <button
-              onClick={toggleMenu}
-              className="group relative overflow-hidden bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-400 hover:to-slate-500 text-white font-semibold py-4 px-4 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-slate-400/50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-              aria-label="Close actions menu"
-            >
-              <span className="relative z-10 flex items-center justify-center gap-2">
-                ✕
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            </button>
+                <button
+                  onClick={handleClearAll}
+                  className="w-full px-4 py-3 text-left text-red-600 hover:bg-red-50 transition-colors duration-200 flex items-center gap-3"
+                  aria-label="Clear all cards from board"
+                >
+                  <span className="text-lg">🗑️</span>
+                  <span>Clear All</span>
+                </button>
+              </div>
             </div>
           )}
         </div>
