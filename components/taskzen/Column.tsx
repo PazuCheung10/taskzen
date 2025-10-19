@@ -225,13 +225,16 @@ export default function Column({ columnId, title, searchQuery, activeCardId, dra
             
             // Insert placeholder at the correct position if this column should show it
             if (shouldShowPlaceholder && activeCardId) {
-              cardsWithPlaceholder.splice(placeholderPosition, 0, null);
+              // Ensure position is within bounds
+              const maxPosition = cardsWithPlaceholder.length;
+              const safePosition = Math.min(Math.max(placeholderPosition, 0), maxPosition);
+              cardsWithPlaceholder.splice(safePosition, 0, null);
             }
             
             return cardsWithPlaceholder.map((card, index) => {
               // Render placeholder
               if (card === null) {
-                return <PlaceholderCard key="placeholder" />;
+                return <PlaceholderCard key={`placeholder-${columnId}-${placeholderPosition}`} />;
               }
               
               // Render actual card

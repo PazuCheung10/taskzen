@@ -89,8 +89,14 @@ export default function TaskzenClient() {
       if (activeColumn === overColumn) {
         const activeIndex = columns[activeColumn].cardOrder.indexOf(activeId);
         
-        if (activeIndex !== overIndex) {
-          reorderCard(activeColumn, activeId, overIndex);
+        // Adjust position if we're dragging down (to account for placeholder)
+        let adjustedPosition = overIndex;
+        if (activeIndex < overIndex) {
+          adjustedPosition = overIndex - 1;
+        }
+        
+        if (activeIndex !== adjustedPosition) {
+          reorderCard(activeColumn, activeId, adjustedPosition);
         }
       }
     }
