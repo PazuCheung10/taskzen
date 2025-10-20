@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useDroppable } from '@dnd-kit/core';
-import { useSortable } from '@dnd-kit/sortable';
+import { useSortable, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useTaskzenStore } from '@/lib/taskzen/store';
 import { selectCardsInColumn, filterBoard } from '@/lib/taskzen/selectors';
@@ -116,7 +116,19 @@ export default function Column({ columnId, title, searchQuery, activeCardId, dra
   };
 
   // Check if this column should show a placeholder
-  const shouldShowPlaceholder = dragOverInfo?.columnId === columnId && activeCardId;
+  const shouldShowPlaceholder =
+    dragOverInfo?.columnId === columnId &&
+    activeCardId &&
+    (() => {
+      let activeColumn: ColumnId | null = null;
+      for (const [cid, col] of Object.entries(columns)) {
+        if (col.cardOrder.includes(activeCardId)) {
+          activeColumn = cid as ColumnId;
+          break;
+        }
+      }
+      return activeColumn !== columnId; // show placeholder only for cross-column drags
+    })();
   const placeholderPosition = dragOverInfo?.position || 0;
 
   // Placeholder Component
@@ -201,60 +213,65 @@ export default function Column({ columnId, title, searchQuery, activeCardId, dra
       
           {/* Cards List */}
           <div className="relative z-10 flex-1 space-y-4" ref={setDroppableRef}>
-            {(() => {
-              const cardsWithPlaceholder: (Card | null)[] = [...filteredCards];
-              
-              // Insert placeholder at the correct position if this column should show it
-              if (shouldShowPlaceholder && activeCardId) {
-                // Ensure position is within bounds
-                const maxPosition = cardsWithPlaceholder.length;
-                const safePosition = Math.min(Math.max(placeholderPosition, 0), maxPosition);
-                cardsWithPlaceholder.splice(safePosition, 0, null);
-              }
-              
-              // If no cards and no placeholder, show empty state
-              if (cardsWithPlaceholder.length === 0) {
-                return (
-                  <div className="text-center py-12">
-                    {!showAddForm && (
-                      <div className="text-6xl mb-4 opacity-50">
-                        {searchQuery ? '🔍' : getColumnIcon(columnId)}
-                      </div>
-                    )}
-                    {searchQuery && (
-                      <p className="text-slate-300 text-lg font-medium mb-2">
-                        No tasks match "{searchQuery}"
-                      </p>
-                    )}
-                    {!searchQuery && !showAddForm && (
-                      <p className="text-slate-400 text-sm">
-                        Click "Add Card" to get started
-                      </p>
-                    )}
-                  </div>
-                );
-              }
-              
-              // Render cards and placeholder
-              return cardsWithPlaceholder.map((card, index) => {
-                // Render placeholder
-                if (card === null) {
-                  return <PlaceholderCard key={`placeholder-${columnId}-${placeholderPosition}`} />;
+            <SortableContext
+              items={filteredCards.map(card => card.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              {(() => {
+                const cardsWithPlaceholder: (Card | null)[] = [...filteredCards];
+                
+                // Insert placeholder at the correct position if this column should show it
+                if (shouldShowPlaceholder && activeCardId) {
+                  // Ensure position is within bounds
+                  const maxPosition = cardsWithPlaceholder.length;
+                  const safePosition = Math.min(Math.max(placeholderPosition, 0), maxPosition);
+                  cardsWithPlaceholder.splice(safePosition, 0, null);
                 }
                 
-                // Render actual card
-                return (
-                  <DraggableCard
-                    key={card.id}
-                    card={card}
-                    columnId={columnId}
-                    isEditing={editingCardId === card.id}
-                    onEditStateChange={handleEditStateChange}
-                    activeCardId={activeCardId}
-                  />
-                );
-              });
-            })()}
+                // If no cards and no placeholder, show empty state
+                if (cardsWithPlaceholder.length === 0) {
+                  return (
+                    <div className="text-center py-12">
+                      {!showAddForm && (
+                        <div className="text-6xl mb-4 opacity-50">
+                          {searchQuery ? '🔍' : getColumnIcon(columnId)}
+                        </div>
+                      )}
+                      {searchQuery && (
+                        <p className="text-slate-300 text-lg font-medium mb-2">
+                          No tasks match "{searchQuery}"
+                        </p>
+                      )}
+                      {!searchQuery && !showAddForm && (
+                        <p className="text-slate-400 text-sm">
+                          Click "Add Card" to get started
+                        </p>
+                      )}
+                    </div>
+                  );
+                }
+                
+                // Render cards and placeholder
+                return cardsWithPlaceholder.map((card, index) => {
+                  // Render placeholder
+                  if (card === null) {
+                    return <PlaceholderCard key={`placeholder-${columnId}-${placeholderPosition}`} />;
+                  }
+                  
+                  // Render actual card
+                  return (
+                    <DraggableCard
+                      key={card.id}
+                      card={card}
+                      columnId={columnId}
+                      isEditing={editingCardId === card.id}
+                      onEditStateChange={handleEditStateChange}
+                      activeCardId={activeCardId}
+                    />
+                  );
+                });
+              })()}
+            </SortableContext>
           </div>
     </div>
   );

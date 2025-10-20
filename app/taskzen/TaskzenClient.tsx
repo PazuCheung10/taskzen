@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { DndContext, DragEndEvent, DragOverEvent, DragStartEvent, closestCenter, DragOverlay } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, DragOverEvent, DragStartEvent, closestCorners, DragOverlay } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import Column from '@/components/taskzen/Column';
 import Toolbar from '@/components/taskzen/Toolbar';
@@ -80,15 +80,21 @@ export default function TaskzenClient() {
 
       // Calculate drop position
       const overIndex = columns[overColumn].cardOrder.indexOf(overId);
-      setDragOverInfo({
-        columnId: overColumn,
-        position: overIndex
-      });
 
-      // If reordering within same column
       if (activeColumn === overColumn) {
-        // Don't call reorderCard here - let handleDragEnd handle it
-        // This prevents double-dodging with the placeholder
+        // Same column: add +1 correction when dragging downward
+        const activeIndex = columns[activeColumn].cardOrder.indexOf(activeId);
+        const isMovingDown = activeIndex < overIndex;
+        setDragOverInfo({
+          columnId: overColumn,
+          position: overIndex + (isMovingDown ? 1 : 0),
+        });
+      } else {
+        // Different column: no correction needed
+        setDragOverInfo({
+          columnId: overColumn,
+          position: overIndex,
+        });
       }
     }
   };
@@ -96,64 +102,60 @@ export default function TaskzenClient() {
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     
-    // Clear the active card and drag over info
+    if (!over) { 
+      setActiveCard(null);
+      setDragOverInfo(null);
+      return;
+    }
+
+    // Save dragOverInfo before clearing it
+    const info = dragOverInfo;
+
     setActiveCard(null);
     setDragOverInfo(null);
-    
-    if (!over) return;
 
     const activeId = active.id as string;
     const overId = over.id as string;
 
-    // Find which column the active card is in
+    // Find which column the active card belongs to
     let activeColumn: ColumnId | null = null;
-    for (const [columnId, column] of Object.entries(columns)) {
-      if (column.cardOrder.includes(activeId)) {
-        activeColumn = columnId as ColumnId;
-        break;
+    for (const [cid, col] of Object.entries(columns)) {
+      if (col.cardOrder.includes(activeId)) { 
+        activeColumn = cid as ColumnId; 
+        break; 
       }
     }
-
     if (!activeColumn) return;
 
-    // If dropping on a column
-    if (COLUMNS.some(col => col.id === overId)) {
-      const targetColumn = overId as ColumnId;
-      if (activeColumn !== targetColumn) {
-        moveCard(activeId, targetColumn);
-      }
+    // Dropped on column
+    if (COLUMNS.some(c => c.id === overId)) {
+      const targetCol = overId as ColumnId;
+      if (activeColumn !== targetCol) moveCard(activeId, targetCol);
       return;
     }
 
-    // If dropping on another card
+    // Dropped on another card
     if (activeId !== overId) {
-      // Find which column the over card is in
       let overColumn: ColumnId | null = null;
-      for (const [columnId, column] of Object.entries(columns)) {
-        if (column.cardOrder.includes(overId)) {
-          overColumn = columnId as ColumnId;
-          break;
+      for (const [cid, col] of Object.entries(columns)) {
+        if (col.cardOrder.includes(overId)) { 
+          overColumn = cid as ColumnId; 
+          break; 
         }
       }
-
       if (!overColumn) return;
 
-      // If moving between columns
       if (activeColumn !== overColumn) {
         moveCard(activeId, overColumn);
-      } else {
-        // Same column reordering - use the placeholder position directly
+      } else if (info?.columnId === activeColumn) {
         const activeIndex = columns[activeColumn].cardOrder.indexOf(activeId);
-        
-        // Use the dragOverInfo position directly (this is where the placeholder shows)
-        const targetPosition = dragOverInfo?.position || 0;
-        
-        if (activeIndex !== targetPosition) {
-          reorderCard(activeColumn, activeId, targetPosition);
-        }
+        const targetIndex = clamp(info.position, 0, columns[activeColumn].cardOrder.length - 1);
+        if (activeIndex !== targetIndex) reorderCard(activeColumn, activeId, targetIndex);
       }
     }
   };
+
+  const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-slate-100">
@@ -184,38 +186,26 @@ export default function TaskzenClient() {
             />
           </div>
           
-          {/* Columns Grid */}
-          <DndContext
-            collisionDetection={closestCenter}
-            onDragStart={handleDragStart}
-            onDragOver={handleDragOver}
-            onDragEnd={handleDragEnd}
-          >
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {COLUMNS.map((column) => {
-                const columnCards = columns[column.id].cardOrder
-                  .map(cardId => cards[cardId])
-                  .filter(Boolean);
-                
-                return (
-                  <SortableContext
-                    key={column.id}
-                    id={column.id}
-                    items={columnCards.map(card => card.id)}
-                    strategy={verticalListSortingStrategy}
-                  >
+              {/* Columns Grid */}
+              <DndContext
+                collisionDetection={closestCorners}
+                onDragStart={handleDragStart}
+                onDragOver={handleDragOver}
+                onDragEnd={handleDragEnd}
+              >
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  {COLUMNS.map((column) => (
                     <Column
+                      key={column.id}
                       columnId={column.id}
                       title={column.title}
                       searchQuery={searchQuery}
                       activeCardId={activeCard?.id}
                       dragOverInfo={dragOverInfo}
                     />
-                  </SortableContext>
-                );
-              })}
-              </div>
-            </DndContext>
+                  ))}
+                </div>
+              </DndContext>
             
             {/* Drag Overlay */}
             <DragOverlay>
