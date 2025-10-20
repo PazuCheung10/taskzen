@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { DndContext, DragEndEvent, DragOverEvent, DragStartEvent, closestCorners, DragOverlay } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, DragOverEvent, DragStartEvent, pointerWithin, DragOverlay } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import Column from '@/components/taskzen/Column';
 import Toolbar from '@/components/taskzen/Toolbar';
@@ -57,11 +57,20 @@ export default function TaskzenClient() {
     // If hovering over a column (not a card)
     if (COLUMNS.some(col => col.id === overId)) {
       const targetColumn = overId as ColumnId;
-      const columnCards = columns[targetColumn].cardOrder.map(cardId => cards[cardId]).filter(Boolean);
-      setDragOverInfo({
-        columnId: targetColumn,
-        position: columnCards.length
-      });
+
+      // If hovering own column, show placeholder at the end
+      if (targetColumn === activeColumn) {
+        setDragOverInfo({
+          columnId: targetColumn,
+          position: columns[targetColumn].cardOrder.length, // visual end
+        });
+      } else {
+        // Moving across columns
+        setDragOverInfo({
+          columnId: targetColumn,
+          position: columns[targetColumn].cardOrder.length,
+        });
+      }
       return;
     }
 
@@ -130,7 +139,24 @@ export default function TaskzenClient() {
     // Dropped on column
     if (COLUMNS.some(c => c.id === overId)) {
       const targetCol = overId as ColumnId;
-      if (activeColumn !== targetCol) moveCard(activeId, targetCol);
+
+      if (activeColumn !== targetCol) {
+        // Cross-column: move to target column
+        moveCard(activeId, targetCol);
+      } else {
+        // Same-column: put it at the end (or use placeholder position)
+        const activeIndex = columns[activeColumn].cardOrder.indexOf(activeId);
+        const lastIndex = columns[activeColumn].cardOrder.length - 1;
+        
+        // Use placeholder position if available, otherwise move to end
+        const targetIndex = info?.columnId === activeColumn 
+          ? Math.min(info.position, lastIndex)
+          : lastIndex;
+          
+        if (activeIndex !== targetIndex) {
+          reorderCard(activeColumn, activeId, targetIndex);
+        }
+      }
       return;
     }
 
@@ -188,7 +214,7 @@ export default function TaskzenClient() {
           
               {/* Columns Grid */}
               <DndContext
-                collisionDetection={closestCorners}
+                collisionDetection={pointerWithin}
                 onDragStart={handleDragStart}
                 onDragOver={handleDragOver}
                 onDragEnd={handleDragEnd}
