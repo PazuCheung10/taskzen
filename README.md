@@ -22,7 +22,7 @@ A minimalist Kanban-style productivity app built with Next.js 14, TypeScript, an
 ### Core Functionality
 - **📋 Three Columns**: Todo, Doing, Done with beautiful gradients
 - **➕ Card Management**: Add, edit, delete cards with title and optional description
-- **🔄 Movement**: Move cards between columns and reorder within columns (no external DnD library)
+- **🔄 Drag & Drop**: Smooth drag-and-drop between columns and reorder within columns
 - **💾 Persistence**: Automatic localStorage persistence - works offline!
 - **🔍 Search**: Real-time filtering by title or description
 - **📤 Export/Import**: JSON export to clipboard and file import
@@ -34,6 +34,8 @@ A minimalist Kanban-style productivity app built with Next.js 14, TypeScript, an
 - **📱 Responsive**: Works on desktop, tablet, and mobile
 - **🎨 Modern UI**: Glass-morphism design with gradients and animations
 - **⚡ Performance**: Instant loading and smooth interactions
+- **🎯 Single Edit Mode**: Only one card can be edited at a time for better UX
+- **🔄 Smooth Animations**: Visual feedback with placeholders and drag overlays
 
 ## 🎯 How to Use
 
@@ -43,8 +45,8 @@ A minimalist Kanban-style productivity app built with Next.js 14, TypeScript, an
 3. Press Enter or click "Add" to save
 
 ### Moving Tasks
-- **Between Columns**: Use the left/right arrow buttons
-- **Within Column**: Use the up/down arrow buttons
+- **Drag & Drop**: Simply drag cards between columns or reorder within columns
+- **Visual Feedback**: See placeholders and smooth animations during drag operations
 - **Keyboard**: Tab to navigate, Enter to activate buttons
 
 ### Search & Filter
@@ -97,6 +99,7 @@ A minimalist Kanban-style productivity app built with Next.js 14, TypeScript, an
 - **🎨 Styling**: Tailwind CSS with custom gradients
 - **🗃️ State**: Zustand with persist middleware
 - **💾 Storage**: localStorage (offline-first)
+- **🔄 Drag & Drop**: @dnd-kit for smooth drag-and-drop interactions
 
 ### Design Principles
 - **🎯 Clear Boundaries**: Components only call store actions
@@ -110,7 +113,7 @@ A minimalist Kanban-style productivity app built with Next.js 14, TypeScript, an
 - ✅ `/taskzen` loads instantly and works offline (localStorage)
 - ✅ CRUD + move + reorder + search all work perfectly
 - ✅ State persists across refreshes
-- ✅ No external DnD library (buttons/keyboard suffice)
+- ✅ Smooth drag-and-drop with @dnd-kit library
 - ✅ Minimal, readable code with clear boundaries
 - ✅ Components only call store actions; no direct localStorage code
 - ✅ Derived logic lives in selectors.ts
