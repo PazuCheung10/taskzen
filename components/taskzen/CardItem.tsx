@@ -9,6 +9,7 @@ interface CardItemProps {
   columnId: ColumnId;
   onEditStateChange?: (isEditing: boolean) => void;
   isHovered?: boolean;
+  isEditing?: boolean; // Add this prop to control edit state from parent
 }
 
 export default function CardItem({
@@ -16,8 +17,8 @@ export default function CardItem({
   columnId,
   onEditStateChange,
   isHovered = false,
+  isEditing = false, // Use parent-controlled edit state
 }: CardItemProps) {
-  const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(card.title);
   const [editDescription, setEditDescription] = useState(card.description || '');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -37,7 +38,6 @@ export default function CardItem({
 
   const handleEdit = () => {
     if (isProcessing) return;
-    setIsEditing(true);
     setEditTitle(card.title);
     setEditDescription(card.description || '');
     onEditStateChange?.(true);
@@ -45,7 +45,6 @@ export default function CardItem({
 
   const handleCancel = () => {
     if (isProcessing) return;
-    setIsEditing(false);
     setEditTitle(card.title);
     setEditDescription(card.description || '');
     onEditStateChange?.(false);
@@ -60,7 +59,6 @@ export default function CardItem({
         title: editTitle.trim(),
         description: editDescription.trim() || undefined,
       });
-      setIsEditing(false);
       onEditStateChange?.(false);
     } finally {
       setIsProcessing(false);

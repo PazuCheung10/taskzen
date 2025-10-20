@@ -58,12 +58,13 @@ function DraggableCard({ card, columnId, isEditing, onEditStateChange, activeCar
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <CardItem 
-        card={card} 
-        columnId={columnId} 
-        onEditStateChange={(editing) => onEditStateChange(card.id, editing)}
-        isHovered={isHovered}
-      />
+          <CardItem 
+            card={card} 
+            columnId={columnId} 
+            onEditStateChange={(editing) => onEditStateChange(card.id, editing)}
+            isHovered={isHovered}
+            isEditing={isEditing}
+          />
       {/* Drag Handle - only show when not editing */}
       {!isEditing && (
         <div
