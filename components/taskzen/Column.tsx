@@ -10,6 +10,22 @@ import { ColumnId, Card } from '@/lib/taskzen/types';
 import NewCardForm from './NewCardForm';
 import CardItem from './CardItem';
 
+// Bottom Dropzone Component
+function ColumnBottomDropzone({ id }: { id: string }) {
+  const { setNodeRef, isOver } = useDroppable({ id });
+  return (
+    <div
+      ref={setNodeRef}
+      // keep it clickable/hoverable but visually small
+      className="h-6 mt-1"
+      style={{ 
+        outline: isOver ? '2px dashed rgba(59, 130, 246, 0.6)' : 'none',
+        borderRadius: 8,
+      }}
+    />
+  );
+}
+
 interface ColumnProps {
   columnId: ColumnId;
   title: string;
@@ -272,6 +288,9 @@ export default function Column({ columnId, title, searchQuery, activeCardId, dra
                 });
               })()}
             </SortableContext>
+            
+            {/* Bottom dropzone */}
+            <ColumnBottomDropzone id={`${columnId}__bottom`} />
           </div>
     </div>
   );

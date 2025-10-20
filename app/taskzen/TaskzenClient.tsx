@@ -54,6 +54,16 @@ export default function TaskzenClient() {
 
     if (!activeColumn) return;
 
+    // If hovering over bottom dropzone
+    if (over && typeof over.id === 'string' && over.id.endsWith('__bottom')) {
+      const targetCol = over.id.replace('__bottom', '') as ColumnId;
+      setDragOverInfo({
+        columnId: targetCol,
+        position: columns[targetCol].cardOrder.length, // placeholder at visual end
+      });
+      return;
+    }
+
     // If hovering over a column (not a card)
     if (COLUMNS.some(col => col.id === overId)) {
       const targetColumn = overId as ColumnId;
@@ -135,6 +145,20 @@ export default function TaskzenClient() {
       }
     }
     if (!activeColumn) return;
+
+    // If dropped on bottom dropzone
+    if (over && typeof over.id === 'string' && over.id.endsWith('__bottom')) {
+      const targetCol = over.id.replace('__bottom', '') as ColumnId;
+
+      if (activeColumn !== targetCol) {
+        moveCard(activeId, targetCol); // to end by default in your store
+      } else {
+        const lastIndex = columns[targetCol].cardOrder.length - 1;
+        const activeIndex = columns[targetCol].cardOrder.indexOf(activeId);
+        if (activeIndex !== lastIndex) reorderCard(targetCol, activeId, lastIndex);
+      }
+      return;
+    }
 
     // Dropped on column
     if (COLUMNS.some(c => c.id === overId)) {
