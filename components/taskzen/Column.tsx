@@ -19,6 +19,8 @@ interface ColumnProps {
     columnId: ColumnId;
     position: number;
   } | null;
+  editingCardId?: string | null;
+  onEditStateChange?: (cardId: string, isEditing: boolean) => void;
 }
 
 // Draggable Card Component
@@ -61,7 +63,7 @@ function DraggableCard({ card, columnId, isEditing, onEditStateChange, activeCar
           <CardItem 
             card={card} 
             columnId={columnId} 
-            onEditStateChange={(editing) => onEditStateChange(card.id, editing)}
+            onEditStateChange={(editing) => onEditStateChange?.(card.id, editing)}
             isHovered={isHovered}
             isEditing={isEditing}
           />
@@ -80,9 +82,8 @@ function DraggableCard({ card, columnId, isEditing, onEditStateChange, activeCar
   );
 }
 
-export default function Column({ columnId, title, searchQuery, activeCardId, dragOverInfo }: ColumnProps) {
+export default function Column({ columnId, title, searchQuery, activeCardId, dragOverInfo, editingCardId, onEditStateChange }: ColumnProps) {
   const [showAddForm, setShowAddForm] = useState(false);
-  const [editingCardId, setEditingCardId] = useState<string | null>(null);
   const { columns, cards } = useTaskzenStore();
   
   // Apply search filter if there's a query
@@ -108,13 +109,6 @@ export default function Column({ columnId, title, searchQuery, activeCardId, dra
     setShowAddForm(false);
   };
 
-  const handleEditStateChange = (cardId: string, isEditing: boolean) => {
-    if (isEditing) {
-      setEditingCardId(cardId);
-    } else {
-      setEditingCardId(null);
-    }
-  };
 
   // Check if this column should show a placeholder
   const shouldShowPlaceholder =
@@ -268,7 +262,7 @@ export default function Column({ columnId, title, searchQuery, activeCardId, dra
                             card={card}
                             columnId={columnId}
                             isEditing={editingCardId === card.id}
-                            onEditStateChange={handleEditStateChange}
+                            onEditStateChange={onEditStateChange || (() => {})}
                             activeCardId={activeCardId}
                           />
                         );

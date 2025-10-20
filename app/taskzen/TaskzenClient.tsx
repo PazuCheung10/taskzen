@@ -21,7 +21,16 @@ export default function TaskzenClient() {
     columnId: ColumnId;
     position: number;
   } | null>(null);
+  const [editingCardId, setEditingCardId] = useState<string | null>(null);
   const { moveCard, reorderCard, columns, cards } = useTaskzenStore();
+
+  const handleEditStateChange = (cardId: string, isEditing: boolean) => {
+    if (isEditing) {
+      setEditingCardId(cardId);
+    } else {
+      setEditingCardId(null);
+    }
+  };
 
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
@@ -256,6 +265,8 @@ export default function TaskzenClient() {
                       searchQuery={searchQuery}
                       activeCardId={activeCard?.id}
                       dragOverInfo={dragOverInfo}
+                      editingCardId={editingCardId}
+                      onEditStateChange={handleEditStateChange}
                     />
                   ))}
                 </div>
