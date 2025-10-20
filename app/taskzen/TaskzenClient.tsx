@@ -54,12 +54,12 @@ export default function TaskzenClient() {
 
     if (!activeColumn) return;
 
-    // If hovering over bottom dropzone
-    if (over && typeof over.id === 'string' && over.id.endsWith('__bottom')) {
-      const targetCol = over.id.replace('__bottom', '') as ColumnId;
-      setDragOverInfo({
-        columnId: targetCol,
-        position: columns[targetCol].cardOrder.length, // placeholder at visual end
+    // If hovering over tail sentinel
+    if (overId.endsWith('__tail')) {
+      const overColumn = overId.replace('__tail', '') as ColumnId;
+      setDragOverInfo({ 
+        columnId: overColumn, 
+        position: columns[overColumn].cardOrder.length 
       });
       return;
     }
@@ -146,16 +146,20 @@ export default function TaskzenClient() {
     }
     if (!activeColumn) return;
 
-    // If dropped on bottom dropzone
-    if (over && typeof over.id === 'string' && over.id.endsWith('__bottom')) {
-      const targetCol = over.id.replace('__bottom', '') as ColumnId;
-
-      if (activeColumn !== targetCol) {
-        moveCard(activeId, targetCol); // to end by default in your store
+    // If dropped on tail sentinel
+    if (overId.endsWith('__tail')) {
+      const overColumn = overId.replace('__tail', '') as ColumnId;
+      
+      if (activeColumn !== overColumn) {
+        // Cross-column: move to target column
+        moveCard(activeId, overColumn);
       } else {
-        const lastIndex = columns[targetCol].cardOrder.length - 1;
-        const activeIndex = columns[targetCol].cardOrder.indexOf(activeId);
-        if (activeIndex !== lastIndex) reorderCard(targetCol, activeId, lastIndex);
+        // Same-column: move to end
+        const lastIndex = columns[activeColumn].cardOrder.length - 1;
+        const activeIndex = columns[activeColumn].cardOrder.indexOf(activeId);
+        if (activeIndex !== lastIndex) {
+          reorderCard(activeColumn, activeId, lastIndex);
+        }
       }
       return;
     }

@@ -10,22 +10,6 @@ import { ColumnId, Card } from '@/lib/taskzen/types';
 import NewCardForm from './NewCardForm';
 import CardItem from './CardItem';
 
-// Bottom Dropzone Component
-function ColumnBottomDropzone({ id }: { id: string }) {
-  const { setNodeRef, isOver } = useDroppable({ id });
-  return (
-    <div
-      ref={setNodeRef}
-      // keep it clickable/hoverable but visually small
-      className="h-6 mt-1"
-      style={{ 
-        outline: isOver ? '2px dashed rgba(59, 130, 246, 0.6)' : 'none',
-        borderRadius: 8,
-      }}
-    />
-  );
-}
-
 interface ColumnProps {
   columnId: ColumnId;
   title: string;
@@ -229,24 +213,27 @@ export default function Column({ columnId, title, searchQuery, activeCardId, dra
       
           {/* Cards List */}
           <div className="relative z-10 flex-1 space-y-4" ref={setDroppableRef}>
-            <SortableContext
-              items={filteredCards.map(card => card.id)}
-              strategy={verticalListSortingStrategy}
-            >
-              {(() => {
-                const cardsWithPlaceholder: (Card | null)[] = [...filteredCards];
-                
-                // Insert placeholder at the correct position if this column should show it
-                if (shouldShowPlaceholder && activeCardId) {
-                  // Ensure position is within bounds
-                  const maxPosition = cardsWithPlaceholder.length;
-                  const safePosition = Math.min(Math.max(placeholderPosition, 0), maxPosition);
-                  cardsWithPlaceholder.splice(safePosition, 0, null);
-                }
-                
-                // If no cards and no placeholder, show empty state
-                if (cardsWithPlaceholder.length === 0) {
-                  return (
+            {(() => {
+              const cardsWithPlaceholder: (Card | null)[] = [...filteredCards];
+              
+              // Insert placeholder at the correct position if this column should show it
+              if (shouldShowPlaceholder && activeCardId) {
+                // Ensure position is within bounds
+                const maxPosition = cardsWithPlaceholder.length;
+                const safePosition = Math.min(Math.max(placeholderPosition, 0), maxPosition);
+                cardsWithPlaceholder.splice(safePosition, 0, null);
+              }
+              
+              return (
+                <SortableContext
+                  items={cardsWithPlaceholder
+                    .filter(Boolean)
+                    .map((c) => (c as Card).id)
+                    .concat(`${columnId}__tail`)} // add tail at the end
+                  strategy={verticalListSortingStrategy}
+                >
+                  {/* If no cards and no placeholder, show empty state */}
+                  {cardsWithPlaceholder.length === 0 ? (
                     <div className="text-center py-12">
                       {!showAddForm && (
                         <div className="text-6xl mb-4 opacity-50">
@@ -264,33 +251,35 @@ export default function Column({ columnId, title, searchQuery, activeCardId, dra
                         </p>
                       )}
                     </div>
-                  );
-                }
-                
-                // Render cards and placeholder
-                return cardsWithPlaceholder.map((card, index) => {
-                  // Render placeholder
-                  if (card === null) {
-                    return <PlaceholderCard key={`placeholder-${columnId}-${placeholderPosition}`} />;
-                  }
-                  
-                  // Render actual card
-                  return (
-                    <DraggableCard
-                      key={card.id}
-                      card={card}
-                      columnId={columnId}
-                      isEditing={editingCardId === card.id}
-                      onEditStateChange={handleEditStateChange}
-                      activeCardId={activeCardId}
-                    />
-                  );
-                });
-              })()}
-            </SortableContext>
-            
-            {/* Bottom dropzone */}
-            <ColumnBottomDropzone id={`${columnId}__bottom`} />
+                  ) : (
+                    <>
+                      {/* Render cards and placeholder */}
+                      {cardsWithPlaceholder.map((card, index) => {
+                        // Render placeholder
+                        if (card === null) {
+                          return <PlaceholderCard key={`placeholder-${columnId}-${placeholderPosition}`} />;
+                        }
+                        
+                        // Render actual card
+                        return (
+                          <DraggableCard
+                            key={card.id}
+                            card={card}
+                            columnId={columnId}
+                            isEditing={editingCardId === card.id}
+                            onEditStateChange={handleEditStateChange}
+                            activeCardId={activeCardId}
+                          />
+                        );
+                      })}
+                      
+                      {/* Render an invisible tail sentinel */}
+                      <div id={`${columnId}__tail`} className="h-6" />
+                    </>
+                  )}
+                </SortableContext>
+              );
+            })()}
           </div>
     </div>
   );
