@@ -4,7 +4,7 @@ import { TaskzenStore, ColumnId, Board, Card } from './types';
 
 const STORAGE_KEY = 'taskzen:v1';
 
-const initialBoard: Board = {
+const emptyBoard: Board = {
   columns: {
     todo: {
       id: 'todo',
@@ -25,10 +25,62 @@ const initialBoard: Board = {
   cards: {},
 };
 
+const seedBoard: Board = {
+  columns: {
+    todo: {
+      id: 'todo',
+      title: 'Todo',
+      cardOrder: ['demo-1', 'demo-2', 'demo-3'],
+    },
+    doing: {
+      id: 'doing',
+      title: 'Doing',
+      cardOrder: ['demo-4', 'demo-5'],
+    },
+    done: {
+      id: 'done',
+      title: 'Done',
+      cardOrder: ['demo-6'],
+    },
+  },
+  cards: {
+    'demo-1': {
+      id: 'demo-1',
+      title: 'Explore the board',
+      description: 'Drag cards between columns and reorder within a column.',
+    },
+    'demo-2': {
+      id: 'demo-2',
+      title: 'Try search',
+      description: 'Type in the Search box to filter cards live (non-destructive).',
+    },
+    'demo-3': {
+      id: 'demo-3',
+      title: 'Add your first task',
+      description: 'Click “Add Card” in any column to create a new item.',
+    },
+    'demo-4': {
+      id: 'demo-4',
+      title: 'Edit a card',
+      description: 'Hover a card to reveal Edit. Only one card can be edited at a time.',
+    },
+    'demo-5': {
+      id: 'demo-5',
+      title: 'Export / Import',
+      description: 'Use Actions → Export to copy JSON, then Import to restore it.',
+    },
+    'demo-6': {
+      id: 'demo-6',
+      title: 'Works offline',
+      description: 'State persists via localStorage — refresh and everything stays.',
+    },
+  },
+};
+
 export const useTaskzenStore = create<TaskzenStore>()(
   persist(
     (set, get) => ({
-      ...initialBoard,
+      ...seedBoard,
 
       addCard: (col: ColumnId, input: { title: string; description?: string }) => {
         const id = `card-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -138,7 +190,7 @@ export const useTaskzenStore = create<TaskzenStore>()(
       },
 
       clearAll: () => {
-        set(initialBoard);
+        set(emptyBoard);
       },
 
       importJSON: (data: Board) => {
