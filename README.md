@@ -1,6 +1,8 @@
 # TaskZen - Kanban Board
 
-A minimalist Kanban-style productivity app built with Next.js 14, TypeScript, and Zustand. Features a beautiful glass-morphism UI with offline-first functionality.
+A minimalist Kanban-style productivity app built with Next.js (App Router), TypeScript, and Zustand. Features a beautiful glass-morphism UI with offline-first functionality.
+
+Built to explore offline-first state management and keyboard-friendly workflows in a focused, single-purpose UI.
 
 ## 🚀 Quick Start
 
@@ -58,22 +60,10 @@ A minimalist Kanban-style productivity app built with Next.js 14, TypeScript, an
 - **Import**: Click ⚙️ → Import to load from JSON file
 - **Clear All**: Click ⚙️ → Clear to reset the board
 
-## 📸 Screenshots
+## 📸 Screenshots / Demo
 
-### Main Interface
-![TaskZen Main Interface](https://via.placeholder.com/800x400/1e293b/ffffff?text=TaskZen+Kanban+Board)
-
-### Adding a Task
-![Adding a Task](https://via.placeholder.com/800x400/1e293b/ffffff?text=Adding+a+New+Task)
-
-### Search Functionality
-![Search Results](https://via.placeholder.com/800x400/1e293b/ffffff?text=Search+Results)
-
-## 🎥 Demo Video
-
-**📹 [Watch the 60-second demo on Loom](https://www.loom.com/share/your-video-id)**
-
-*Note: Replace with actual Loom video link*
+This repository focuses on implementation and architecture.  
+Run locally (`npm install` → `npm run dev`) to experience the full interaction flow at `http://localhost:3000/taskzen`.
 
 ## 🏗️ Architecture
 
@@ -94,7 +84,7 @@ A minimalist Kanban-style productivity app built with Next.js 14, TypeScript, an
 ```
 
 ### Tech Stack
-- **⚡ Framework**: Next.js 14 (App Router)
+- **⚡ Framework**: Next.js (App Router)
 - **🔷 Language**: TypeScript
 - **🎨 Styling**: Tailwind CSS with custom gradients
 - **🗃️ State**: Zustand with persist middleware
@@ -122,3 +112,6 @@ A minimalist Kanban-style productivity app built with Next.js 14, TypeScript, an
 ## 📄 License
 
 This project is part of the Pazu Creates Portfolio series.
+
+---
+Built by Pazu — `https://pazu.dev`
