@@ -114,4 +114,5 @@ Run locally (`npm install` → `npm run dev`) to experience the full interaction
 This project is part of the Pazu Creates Portfolio series.
 
 ---
-Built by Pazu — `https://pazu.dev`
+Built by Pazu
+https://pazu.dev
