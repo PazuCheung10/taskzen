@@ -22,7 +22,7 @@ export default function TaskzenClient() {
     position: number;
   } | null>(null);
   const [editingCardId, setEditingCardId] = useState<string | null>(null);
-  const { moveCard, reorderCard, columns, cards } = useTaskzenStore();
+  const { moveCard, reorderCard, columns, cards, hasHydrated } = useTaskzenStore();
 
   const handleEditStateChange = (cardId: string, isEditing: boolean) => {
     if (isEditing) {
@@ -219,6 +219,18 @@ export default function TaskzenClient() {
   };
 
   const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
+
+  // Wait for hydration to complete before rendering to avoid flash of default data
+  if (!hasHydrated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-slate-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-400 mx-auto mb-4"></div>
+          <p className="text-slate-300">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-slate-100">

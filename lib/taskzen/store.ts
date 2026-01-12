@@ -77,10 +77,11 @@ const seedBoard: Board = {
   },
 };
 
-export const useTaskzenStore = create<TaskzenStore>()(
+export const useTaskzenStore = create<TaskzenStore & { hasHydrated: boolean }>()(
   persist(
     (set, get) => ({
-      ...seedBoard,
+      ...emptyBoard, // Start with empty to avoid flash
+      hasHydrated: false,
 
       addCard: (col: ColumnId, input: { title: string; description?: string }) => {
         const id = `card-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -190,11 +191,11 @@ export const useTaskzenStore = create<TaskzenStore>()(
       },
 
       clearAll: () => {
-        set(emptyBoard);
+        set({ ...emptyBoard, hasHydrated: true });
       },
 
       importJSON: (data: Board) => {
-        set(data);
+        set({ ...data, hasHydrated: true });
       },
 
       exportJSON: () => {
@@ -213,17 +214,31 @@ export const useTaskzenStore = create<TaskzenStore>()(
       version: 1,
       onRehydrateStorage: () => (state) => {
         if (state) {
-          // Ensure all required columns exist
-          const requiredColumns: ColumnId[] = ['todo', 'doing', 'done'];
-          requiredColumns.forEach((colId) => {
-            if (!state.columns[colId]) {
-              state.columns[colId] = {
-                id: colId,
-                title: colId.charAt(0).toUpperCase() + colId.slice(1),
-                cardOrder: [],
-              };
-            }
-          });
+          // Check if this is a fresh install (no persisted data)
+          const hasAnyCards = Object.keys(state.cards).length > 0;
+          const hasAnyCardOrders = Object.values(state.columns).some(col => col.cardOrder.length > 0);
+          const isFreshInstall = !hasAnyCards && !hasAnyCardOrders;
+
+          // If fresh install, seed with demo data
+          if (isFreshInstall) {
+            state.columns = seedBoard.columns;
+            state.cards = seedBoard.cards;
+          } else {
+            // Ensure all required columns exist
+            const requiredColumns: ColumnId[] = ['todo', 'doing', 'done'];
+            requiredColumns.forEach((colId) => {
+              if (!state.columns[colId]) {
+                state.columns[colId] = {
+                  id: colId,
+                  title: colId.charAt(0).toUpperCase() + colId.slice(1),
+                  cardOrder: [],
+                };
+              }
+            });
+          }
+
+          // Mark as hydrated
+          state.hasHydrated = true;
         }
       },
     }
